@@ -1,0 +1,45 @@
+plugins { id 'com.android.application' }
+
+def buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'com.ilnard.towerarcher'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.ilnard.towerarcher'
+        minSdk 24
+        targetSdk 35
+        versionCode buildNumber
+        versionName "0.2.${buildNumber}"
+    }
+
+    signingConfigs {
+        // Тестовый ключ лежит в репозитории, чтобы новые сборки ставились поверх старых.
+        // Для Google Play будет отдельный секретный ключ.
+        test {
+            storeFile file('test.keystore')
+            storePassword 'android'
+            keyAlias 'test'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug { signingConfig signingConfigs.test }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.test
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
