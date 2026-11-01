@@ -34,8 +34,22 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .hpnum{color:#fff;font-weight:900;font-size:13px;text-shadow:0 1px 2px #0008;font-variant-numeric:tabular-nums}
 .iconbtn{pointer-events:auto;width:42px;height:42px;border-radius:50%;background:var(--gold);box-shadow:0 3px 0 var(--gold-d);font-size:18px;flex:none}
 
-.bottom{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;pointer-events:none;
+.bottom{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:space-between;pointer-events:none;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.side{display:flex;gap:8px}
+.skill{pointer-events:auto;position:relative;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;padding:0;overflow:hidden;
+  background:radial-gradient(circle at 35% 30%,#4a5f8a,#1f2a44);border:3px solid var(--gold);box-shadow:0 3px 0 var(--gold-d),0 4px 12px #0005}
+.skill::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(10,14,28,.72) calc(var(--p,0)*1turn),transparent 0)}
+.skill .cdn{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;z-index:1;text-shadow:0 1px 3px #000}
+.skill.locked{filter:grayscale(1) brightness(.75);border-color:#9a8f7a;box-shadow:0 3px 0 #6b6252}
+.skill.locked .cdn::before{content:"+";font-size:22px}
+.skill.ready{animation:ready 1.6s ease-in-out infinite}
+.skill.active{border-color:#fff;box-shadow:0 0 0 3px #ffd24a,0 0 18px #ffb43a}
+.skill.camp{background:radial-gradient(circle at 35% 30%,#fff7e2,#f1dfb6);border-color:var(--wood);box-shadow:0 3px 0 var(--wood-d);font-size:22px;color:var(--wood-d)}
+@keyframes ready{50%{box-shadow:0 3px 0 var(--gold-d),0 0 14px #ffd24a}}
+.buymode{display:flex;gap:6px;align-items:center}
+.buymode button{background:var(--parch-2);border-radius:10px;padding:6px 10px;font-size:13px}
+.buymode button.on{background:var(--ink);color:var(--parch)}
 .chip{pointer-events:auto;background:var(--parch);border:3px solid var(--wood);border-radius:14px;padding:9px 16px;font-size:15px;box-shadow:0 3px 0 var(--wood-d)}
 
 .hint{position:absolute;left:0;right:0;top:64px;text-align:center;color:var(--ink);font-weight:900;font-size:15px;
@@ -64,8 +78,8 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .waves{display:flex;flex-wrap:wrap;gap:6px}
 .waves button{background:var(--parch-2);border-radius:10px;padding:7px 10px;font-size:14px;font-variant-numeric:tabular-nums}
 .waves button.on{background:var(--ink);color:var(--parch)}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.tabs button{background:var(--parch-2);border-radius:10px;padding:9px 4px;font-size:14px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.tabs button{background:var(--parch-2);border-radius:10px;padding:9px 2px;font-size:13px}
 .tabs button.on{background:var(--wood);color:var(--parch)}
 .up{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-top:2px dashed #dcc799}
 .up b{font-size:16px}
@@ -81,7 +95,7 @@ details .stack{margin-top:8px}
 #ad{position:absolute;inset:0;z-index:9;background:#10141f;color:#e8ecf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
 #ad .t{font-family:var(--display);font-size:26px}
 #ad .n{font-size:64px;font-family:var(--display)}
-@media (prefers-reduced-motion:reduce){.hpbar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.hpbar i{transition:none}.skill.ready{animation:none}}
 </style>
 
 </head><body>
@@ -94,7 +108,7 @@ details .stack{margin-top:8px}
     <button class="iconbtn" id="bPause" aria-label="Пауза">❚❚</button>
   </div>
   <div class="hint" id="hint" hidden>Коснись поля и веди палец к цели. Отпусти — выстрел.</div>
-  <div class="bottom" id="bottom" hidden><button class="chip" id="bCamp">⚒ Лагерь</button></div>
+  <div class="bottom" id="bottom" hidden><div class="side"><button class="skill" id="sk-meteor" aria-label="Метеоритный дождь"><svg viewBox="0 0 32 32" width="26" height="26"><path d="M4 4l12 9M8 2l10 9M2 9l11 7" stroke="#ffb04a" stroke-width="3" stroke-linecap="round"/><circle cx="21" cy="20" r="8" fill="#ff7a2e" stroke="#2b1d2c" stroke-width="2"/><circle cx="18.5" cy="17.5" r="2.5" fill="#ffd25a"/></svg><span class="cdn"></span></button><button class="skill" id="sk-rage" aria-label="Быстрая перезарядка"><svg viewBox="0 0 32 32" width="26" height="26"><path d="M18 2L6 18h8l-3 12 13-17h-8z" fill="#ffd24a" stroke="#2b1d2c" stroke-width="2" stroke-linejoin="round"/></svg><span class="cdn"></span></button></div><div class="side"><button class="skill" id="sk-frost" aria-label="Ледяная буря"><svg viewBox="0 0 32 32" width="26" height="26"><g stroke="#e6f7ff" stroke-width="3" stroke-linecap="round"><path d="M16 3v26M4.7 9.5l22.6 13M4.7 22.5l22.6-13"/><path d="M12 5l4 3 4-3M12 27l4-3 4 3" fill="none"/></g><circle cx="16" cy="16" r="3" fill="#8fe3ff"/></svg><span class="cdn"></span></button><button class="skill camp" id="bCamp" aria-label="Лагерь">⚒</button></div></div>
   <div class="overlay" id="ov"><div class="card" id="card"></div></div>
   <div id="ad" hidden></div>
 </div>
@@ -111,21 +125,37 @@ details .stack{margin-top:8px}
    Game/Render/Input/UI — игровая сцена и экраны
    ===================================================================== */
 
-/* ---------- ТАБЛИЦА БАЛАНСА ---------- */
+/* ---------- ТАБЛИЦА БАЛАНСА ----------
+   Бесконечная прогрессия. Здоровье врагов и награды растут геометрически по фазам:
+   до 100-й волны награды почти поспевают за ценами (лёгкий старт), дальше рост HP
+   ускоряется, а наград — замедляется, и прохождение требует всё больше прокачки.
+   Модель экономики (work/econ2.py): ~1 ч до 100-й волны, ~2 ч до 200-й, ~5 ч до 300-й,
+   десятки часов до 400-й и 100+ ч до 500-й при оптимальной прокачке. */
+const PHASES = [            // [до волны, рост HP за волну, рост награды за волну]
+  [100,      1.035, 1.019],
+  [250,      1.060, 1.006],
+  [500,      1.065, 1.006],
+  [Infinity, 1.070, 1.006],
+];
+function phased(w, idx) {
+  let v = 1, prev = 1;
+  for (const p of PHASES) { const span = Math.max(0, Math.min(w, p[0]) - prev); v *= p[idx] ** span; prev = p[0]; if (w <= p[0]) break; }
+  return v;
+}
 const BAL = {
-  tower:  { baseHp: 5, hpPerLevel: 2 },
-  arrow:  { speed: 680, baseDamage: 2, cooldown: 0.42, critMult: 2, volleyN: 5 },
+  tower:  { baseHp: 5 },
+  arrow:  { speed: 680, baseDamage: 2, cooldown: 0.45, minCooldown: 0.12, volleyN: 5, spread: 0.13 },
   wave: {
-    count:      w => Math.min(64, 6 + Math.floor(w * 1.1)),
-    hp:         w => 1 + (w - 1) * 0.10,
-    speed:      w => 1 + Math.min(w, 200) * 0.004,
-    interval:   w => Math.max(0.3, 1.05 - w * 0.006),
-    reward:     w => 1 + Math.floor(w / 10) * 0.5,
-    clearBonus: w => 3 + Math.floor(w / 2),
+    count:      w => Math.min(40, 6 + Math.floor(w * 0.5)),
+    hp:         w => phased(w, 1),
+    speed:      w => 1 + Math.min(w, 300) * 0.0025,
+    interval:   w => Math.max(0.33, 1.05 - w * 0.004),
+    reward:     w => phased(w, 2),
+    clearBonus: w => Math.max(3, Math.round(BAL.wave.count(w) * BAL.wave.reward(w) * 0.6)),
     breakTime: 2.4,
   },
-  // После 500-й волны новых врагов нет: каждые 50 волн растут параметры и таланты известных
-  postCap: { start: 500, every: 50, hpMult: 1.2, speedMult: 1.03, cdMult: 0.92, potencyAdd: 0.15 },
+  // После 500-й волны новых врагов нет: каждые 50 волн растут способности известных
+  postCap: { start: 500, every: 50, cdMult: 0.94, potencyAdd: 0.12 },
 };
 
 /* ---------- ВРАГИ: открытие на 1/3/6 (база), 10..50, далее каждые 50 до 500 ----------
@@ -168,32 +198,42 @@ const ENEMIES = [
 ];
 const ENEMY = Object.fromEntries(ENEMIES.map(e => [e.id, e]));
 
-/* ---------- УЛУЧШЕНИЯ: три ветки ---------- */
+/* ---------- УЛУЧШЕНИЯ: без потолка, рост в процентах, цена растёт геометрически ---------- */
 const ARROW_TYPES = ['Деревянная', 'Стальная', 'Ледяная', 'Взрывная'];
+const pct = x => (x >= 10 ? '×' + fmt(x) : '+' + fmt(Math.round((x - 1) * 1000) / 10) + '%');
 const UPGRADES = {
   character: { title:'Персонаж', items:[
-    { id:'hp',     name:'Крепкие стены',     max:20, cost:l => Math.round(15 * 1.35 ** l),
-      fx:l => `Здоровье башни ${BAL.tower.baseHp + BAL.tower.hpPerLevel*l}` },
-    { id:'reload', name:'Быстрая тетива',    max:12, cost:l => Math.round(20 * 1.4 ** l),
-      fx:l => `Перезарядка ${Progress.cooldown(l).toFixed(2)} с` },
-    { id:'crit',   name:'Меткий глаз',       max:12, cost:l => Math.round(18 * 1.38 ** l),
-      fx:l => `Крит ×2: ${Math.round(Progress.crit(l)*100)}%` },
+    { id:'hp',     name:'Крепкие стены',   cost:l => 30 * 1.22 ** l,
+      fx:l => `Здоровье башни ${Progress.maxHp(l)}` },
+    { id:'repair', name:'Каменщик',        cost:l => 60 * 1.3 ** l,
+      fx:l => l ? `После волны чинит ${l} ❤` : 'Не изучено: башня не чинится между волнами' },
+    { id:'reload', name:'Быстрая тетива',  cost:l => 20 * 1.18 ** l,
+      fx:l => { const r = Progress.rate(l); return r.over > 1 ? `Предел скорости; сверх него урон ${pct(r.over)}` : `Скорость стрельбы ${pct(1.05 ** l)}`; } },
   ]},
   talents: { title:'Таланты', items:[
-    { id:'volley', name:'Пятистрельный залп',max:14, cost:l => Math.round(25 * 1.33 ** l),
-      fx:l => `Шанс залпа ${Math.round(Progress.volley(l)*100)}%` },
-    { id:'fan',    name:'Широкий веер',      max:6,  cost:l => Math.round(30 * 1.6 ** l),
-      fx:l => `Угол между стрелами ${Math.round(Progress.spread(l)*180/Math.PI)}°` },
-    { id:'fire',   name:'Огненные наконечники', max:8, cost:l => Math.round(40 * 1.5 ** l),
-      fx:l => `Поджог ${l*10}% (горение 3 с)` },
+    { id:'volley', name:'Пятистрельный залп', cost:l => 25 * 1.17 ** l,
+      fx:l => { const v = Progress.volley(l); return `Шанс ${Math.round(v.chance * 100)}%` + (v.dmg > 1 ? `, урон залпа ${pct(v.dmg)}` : ''); } },
+    { id:'fire',   name:'Огненные наконечники', cost:l => 40 * 1.18 ** l,
+      fx:l => { const f = Progress.fire(l); return l ? `Поджог ${Math.round(f.chance * 100)}%, горение ${Math.round(f.dps * 100)}% урона/с` : 'Не изучено'; } },
+    { id:'loot',   name:'Добыча',           cost:l => 60 * 1.25 ** l,
+      fx:l => `Монеты за врагов ${pct(1.03 ** l)}` },
   ]},
   weapon: { title:'Оружие', items:[
-    { id:'damage', name:'Наконечник',        max:40, cost:l => Math.round(10 * 1.27 ** l),
-      fx:l => `Урон ${BAL.arrow.baseDamage + l}` },
-    { id:'pierce', name:'Пробитие',          max:4,  cost:l => Math.round(60 * 2.1 ** l),
-      fx:l => `Сквозь ${l} ${l===1?'врага':'врагов'}` },
-    { id:'type',   name:'Тип стрелы',        max:3,  cost:l => [80, 260, 700][l] ?? 0,
-      fx:l => ARROW_TYPES[l] + ['',' — игнорирует броню',' — броня + замедление',' — броня, замедление, взрыв'][l] },
+    { id:'damage', name:'Наконечник',       cost:l => 15 * 1.17 ** l,
+      fx:l => `Урон стрелы ${fmt(Progress.damage(l))}` },
+    { id:'pierce', name:'Пробитие',         cost:l => 500 * 4 ** l,
+      fx:l => l ? `Сквозь ${l} ${l % 10 === 1 && l % 100 !== 11 ? 'врага' : 'врагов'}` : 'Стрела останавливается на первом враге' },
+    { id:'type',   name:'Тип стрелы',       cost:l => l < 3 ? [150, 600, 2500][l] : 2500 * 1.3 ** (l - 2),
+      fx:l => l <= 3 ? ARROW_TYPES[l] + ['', ': пробивает броню', ': броня и замедление', ': броня, замедление и взрыв'][l]
+                    : `Взрывная: взрыв ${Math.round(Progress.splash(l) * 100)}% урона` },
+  ]},
+  skills: { title:'Навыки', items:[
+    { id:'meteor', name:'Метеоритный дождь', cost:l => l ? 120 * 1.2 ** (l - 1) : 120,
+      fx:l => { if (!l) return 'Не изучено. Камни с неба бьют по площади'; const m = Progress.meteor(l); return `${m.n} метеоров по ${pct(m.mult)} урона стрелы ×8, перезарядка ${Math.round(m.cd)} с`; } },
+    { id:'rage',   name:'Быстрая перезарядка', cost:l => l ? 150 * 1.2 ** (l - 1) : 150,
+      fx:l => { if (!l) return 'Не изучено. Стрельба втрое чаще и очередью, пока держишь палец'; const r = Progress.rage(l); return `${fmt(r.dur)} с, урон ${pct(r.mult)}, перезарядка ${Math.round(r.cd)} с`; } },
+    { id:'frost',  name:'Ледяная буря',     cost:l => l ? 150 * 1.2 ** (l - 1) : 150,
+      fx:l => { if (!l) return 'Не изучено. Замедляет всех врагов на поле'; const f = Progress.frost(l); return `Замедление ${Math.round(f.slow * 100)}% на ${fmt(f.dur)} с, урон по замёрзшим ${pct(f.mult)}, перезарядка ${Math.round(f.cd)} с`; } },
   ]},
 };
 const ALL_UPS = Object.values(UPGRADES).flatMap(b => b.items);
@@ -201,34 +241,62 @@ const UP = Object.fromEntries(ALL_UPS.map(u => [u.id, u]));
 
 /* ---------- ПРОГРЕСС: характеристики из уровней ---------- */
 const Progress = {
-  cooldown: l => Math.max(0.12, BAL.arrow.cooldown * 0.9 ** l),
-  crit:     l => Math.min(0.6, 0.05 + 0.04 * l),
-  volley:   l => Math.min(0.5, 0.08 + 0.03 * l),
-  spread:   l => 0.09 + 0.025 * l,
+  maxHp:  l => BAL.tower.baseHp + l,
+  damage: l => BAL.arrow.baseDamage * 1.1 ** l,
+  rate(l) { const m = 1.05 ** l, cd = BAL.arrow.cooldown / m; return { cd:Math.max(BAL.arrow.minCooldown, cd), over:Math.max(1, BAL.arrow.minCooldown / cd) }; },
+  volley(l) { const cap = 21; return { chance:Math.min(.5, .08 + .02 * l), dmg:1.04 ** Math.max(0, l - cap) }; },
+  fire(l)   { return { chance:Math.min(.5, .1 * l), dps:l ? .35 * 1.05 ** (l - 1) : 0 }; },
+  splash(l) { return .5 * 1.05 ** Math.max(0, l - 3); },
+  meteor(l) { return { n:Math.min(12, 4 + Math.floor((l - 1) / 4)), mult:1.08 ** (l - 1), cd:Math.max(15, 30 * .98 ** (l - 1)) }; },
+  rage(l)   { return { dur:Math.min(10, 5 + .25 * (l - 1)), mult:1.05 ** (l - 1), cd:Math.max(20, 40 * .98 ** (l - 1)) }; },
+  frost(l)  { return { dur:Math.min(10, 5 + .2 * (l - 1)), slow:Math.min(.8, .5 + .02 * (l - 1)), mult:1.05 ** (l - 1), cd:Math.max(18, 35 * .98 ** (l - 1)) }; },
   stats(u) {
+    const r = this.rate(u.reload), v = this.volley(u.volley), f = this.fire(u.fire);
     return {
-      maxHp: BAL.tower.baseHp + BAL.tower.hpPerLevel * u.hp,
-      cooldown: this.cooldown(u.reload), crit: this.crit(u.crit),
-      volley: this.volley(u.volley), spread: this.spread(u.fan), fire: u.fire * 0.1,
-      damage: BAL.arrow.baseDamage + u.damage, pierce: u.pierce, arrowType: u.type,
+      maxHp: this.maxHp(u.hp), repair: u.repair, cooldown: r.cd,
+      damage: this.damage(u.damage) * r.over, volley: v.chance, volleyDmg: v.dmg, spread: BAL.arrow.spread,
+      fire: f.chance, burn: f.dps, pierce: u.pierce, arrowType: Math.min(3, u.type), splash: this.splash(u.type),
+      loot: 1.03 ** u.loot,
+      meteor: u.meteor ? this.meteor(u.meteor) : null, rage: u.rage ? this.rage(u.rage) : null, frost: u.frost ? this.frost(u.frost) : null,
     };
   },
 };
 
 /* ---------- СОХРАНЕНИЕ с версией схемы ---------- */
 const Store = {
-  KEY: 'tower-archer-save', SCHEMA: 1,
-  fresh() { return { v:1, coins:0, best:0, sound:true, fx:'high', ups:Object.fromEntries(ALL_UPS.map(u => [u.id, 0])) }; },
+  KEY: 'tower-archer-save', SCHEMA: 2,
+  fresh() { return { v:2, coins:0, best:0, sound:true, fx:'high', ups:Object.fromEntries(ALL_UPS.map(u => [u.id, 0])) }; },
   migrate(d) {
     const f = this.fresh();
     if (!d || typeof d !== 'object') return f;
-    // v0 (черновик без версии) → v1
-    const out = { ...f, ...d, ups:{ ...f.ups, ...(d.ups || {}) }, v:this.SCHEMA };
+    const ups = { ...(d.ups || {}) };
+    if ((d.v || 1) < 2) {
+      // v1 → v2: крит и ширина веера убраны — потраченные монеты возвращаются; урон стал процентным
+      let refund = 0;
+      for (let l = 0; l < (ups.crit || 0); l++) refund += Math.round(18 * 1.38 ** l);
+      for (let l = 0; l < (ups.fan || 0); l++) refund += Math.round(30 * 1.6 ** l);
+      d.coins = (d.coins || 0) + refund; delete ups.crit; delete ups.fan;
+    }
+    const out = { ...f, ...d, ups:{ ...f.ups }, v:this.SCHEMA };
+    for (const k in f.ups) if (Number.isFinite(ups[k])) out.ups[k] = ups[k];
     return out;
   },
   load() { try { return this.migrate(JSON.parse(localStorage.getItem(this.KEY))); } catch { return this.fresh(); } },
   save(d) { try { localStorage.setItem(this.KEY, JSON.stringify(d)); } catch {} },
 };
+
+/* ---------- формат больших чисел: 1.2K, 3.4M, 5.6B, 7.8T, 9.1aa … ---------- */
+const SUFFIX = ['', 'K', 'M', 'B', 'T'];
+function fmt(n) {
+  if (!Number.isFinite(n)) return '∞';
+  const a = Math.abs(n);
+  if (a < 10) return (Math.round(n * 10) / 10).toString();
+  if (a < 1000) return Math.round(n).toString();
+  const e = Math.floor(Math.log10(a) / 3);
+  const s = e < SUFFIX.length ? SUFFIX[e] : String.fromCharCode(97 + Math.floor((e - 5) / 26)) + String.fromCharCode(97 + (e - 5) % 26);
+  const v = n / 1000 ** e;
+  return (v >= 100 ? Math.round(v) : v >= 10 ? Math.round(v * 10) / 10 : Math.round(v * 100) / 100) + s;
+}
 
 /* ---------- РЕКЛАМА: адаптер (заглушка). В Android — Yandex Mobile Ads, rewarded ---------- */
 const Ads = {
@@ -250,7 +318,7 @@ const WaveGen = {
   scale(w) {
     const B = BAL.wave, P = BAL.postCap;
     let hp = B.hp(w), speed = B.speed(w), tier = 0;
-    if (w >= P.start + P.every) { tier = Math.floor((w - P.start) / P.every); hp *= P.hpMult ** tier; speed *= P.speedMult ** tier; }
+    if (w >= P.start + P.every) tier = Math.floor((w - P.start) / P.every);
     return { hp, speed, tier, cd: P.cdMult ** tier, pot: 1 + P.potencyAdd * tier, armorBonus: Math.floor(tier / 2) };
   },
   pool(w) { return ENEMIES.filter(e => e.unlock <= w); },
@@ -653,7 +721,7 @@ function buzz(ms) { try { if (window.AndroidBridge) AndroidBridge.vibrate(ms); e
 function newRun(startWave) {
   S = Progress.stats(save.ups);
   run = { wave:startWave, queue:[], spawnT:0, breakT:0.8, inBreak:true, enemies:[], arrows:[], shots:[], fx:[], texts:[],
-    hp:S.maxHp, kills:0, coins:0, cd:0, recoil:0, hurt:0, pending:null, continued:false, doubled:false, banner:0, startWave };
+    hp:S.maxHp, kills:0, coins:0, cd:0, recoil:0, hurt:0, sk:{ meteor:0, rage:0, frost:0 }, rageT:0, frostT:0, meteorQ:[], meteors:[], decals:[], pending:null, continued:false, doubled:false, banner:0, startWave };
   state = 'play'; showGameUI(true); closeOverlay(); updateHud(true); measureCoinTarget(); requestWakeLock();
   const fresh = WaveGen.newAt(startWave); if (fresh) showNewEnemy(fresh);
 }
@@ -689,12 +757,12 @@ function aimAngle(px, py) {
   return ang;
 }
 function fire(ang) {
-  const a = archerPos(), volley = Math.random() < S.volley, n = volley ? BAL.arrow.volleyN : 1, sp = BAL.arrow.speed * L.scale;
+  const a = archerPos(), volley = Math.random() < S.volley, mult = (volley ? S.volleyDmg : 1) * (run.rageT > 0 && S.rage ? S.rage.mult : 1), n = volley ? BAL.arrow.volleyN : 1, sp = BAL.arrow.speed * L.scale;
   for (let i = 0; i < n; i++) {
     const an = ang + (i - (n - 1) / 2) * S.spread;
-    run.arrows.push({ x:a.x, y:a.y, vx:Math.cos(an) * sp, vy:Math.sin(an) * sp, pierce:S.pierce, hits:new Set(), dead:false });
+    run.arrows.push({ x:a.x, y:a.y, vx:Math.cos(an) * sp, vy:Math.sin(an) * sp, pierce:S.pierce, hits:new Set(), dead:false, mult, rage:run.rageT > 0 });
   }
-  run.cd = S.cooldown; run.recoil = .12;
+  run.cd = run.rageT > 0 ? Math.max(.06, S.cooldown / 3) : S.cooldown; run.recoil = .12;
   ring(a.x + Math.cos(ang) * 26, a.y + Math.sin(ang) * 26, volley ? 'rgba(255,210,90,.95)' : 'rgba(255,255,255,.7)', 3, volley ? 40 : 18, .25, volley ? 5 : 3);
   if (volley) { floatText(a.x, a.y - 44, 'ЗАЛП!', '#ffd24a', 22); burst(a.x + Math.cos(ang) * 26, a.y + Math.sin(ang) * 26, '#ffd76a', 12, 180); sfx('volley'); buzz(25); } else sfx('shoot');
   if (hintShown) { hintShown = false; $('#hint').hidden = true; }
@@ -724,22 +792,22 @@ function damage(e, d, crit) {
   if (e.hp <= 0) kill(e);
 }
 const ARROW_COL = ['#fff2c0', '#dcecff', '#8fe3ff', '#ffb15a'];
-function hitEnemy(e) {
+function hitEnemy(e, a) {
   if (e.armor > 0 && S.arrowType < 1) { e.armor--; e.flash = .08; burst(e.x, e.y - 10, '#dfe8ff', 8, 140); ring(e.x, e.y, 'rgba(220,235,255,.9)', 6, e.size * .7, .25, 3); floatText(e.x, e.y - e.size * .7, 'БЛОК', '#dfe8ff', 13); sfx('block'); return; }
-  const crit = Math.random() < S.crit; const d = S.damage * (crit ? BAL.arrow.critMult : 1);
+  const crit = false, d = S.damage * (a ? a.mult : 1) * frostBonus();
   damage(e, d, crit); sfx('hit'); burst(e.x, e.y, ARROW_COL[S.arrowType], crit ? 12 : 6, crit ? 200 : 120);
   if (crit) ring(e.x, e.y, 'rgba(255,190,80,.9)', 4, e.size, .3, 4);
   if (S.arrowType >= 2) { e.slowT = 2; for (let i = 0; i < 3; i++) addFx({ k:'ice', x:e.x + (Math.random() - .5) * e.size, y:e.y + (Math.random() - .5) * e.size, vx:0, vy:-15, life:.6, max:.6, r:3 }); }
   if (S.arrowType >= 3) { ring(e.x, e.y, 'rgba(255,170,70,.9)', 8, 62, .35, 6); burst(e.x, e.y, '#ffad4d', 14, 200); smoke(e.x, e.y, 4, '120,100,90');
-    for (const o of run.enemies) if (o !== e && !o.dead && !o.invuln && Math.hypot(o.x - e.x, o.y - e.y) < 62) damage(o, d * 0.5, false); }
-  if (S.fire > 0 && Math.random() < S.fire) { e.burnT = 3; e.burnDps = S.damage * 0.35; }
+    for (const o of run.enemies) if (o !== e && !o.dead && !o.invuln && Math.hypot(o.x - e.x, o.y - e.y) < 62) damage(o, d * S.splash, false); }
+  if (S.fire > 0 && Math.random() < S.fire) { e.burnT = 3; e.burnDps = S.damage * S.burn; }
 }
 function kill(e) {
   e.dead = true; run.kills++;
-  const c = Math.max(1, Math.round(e.t.reward * BAL.wave.reward(run.wave) * (e.child || e.minion ? 0.5 : 1)));
+  const c = Math.max(1, Math.round(e.t.reward * BAL.wave.reward(run.wave) * S.loot * (e.child || e.minion ? 0.5 : 1)));
   run.coins += c; save.coins += c; sfx('kill');
   smoke(e.x, e.y, 7); burst(e.x, e.y, '#fff1b0', 10, 170); ring(e.x, e.y, 'rgba(255,255,255,.8)', 4, e.size * .9, .3, 3);
-  coinFly(e.x, e.y, Math.ceil(c / 2)); floatText(e.x, e.y - e.size * .8, '+' + c, '#ffd24a', 15);
+  coinFly(e.x, e.y, Math.ceil(c / 2)); floatText(e.x, e.y - e.size * .8, '+' + fmt(c), '#ffd24a', 15);
   if (e.ab.split && !e.child) for (let i = 0; i < e.ab.split.n; i++) {
     const k = makeEnemy(e.t.id, clampX(e.x + (i ? 22 : -22)), e.y - 6, { child:true, hpMul:0.45, sizeMul:0.7 }); k.flash = .15; run.enemies.push(k);
   }
@@ -763,7 +831,6 @@ function updateFx(dt) {
   run.fx = run.fx.filter(p => p.life > 0); run.texts = run.texts.filter(t => t.life > 0);
 }
 const clampX = x => Math.max(20, Math.min(W - 20, x));
-const fmt = n => n >= 100 ? Math.round(n) : (Math.round(n * 10) / 10).toString();
 
 /* ---------- обновление ---------- */
 function update(dt) {
@@ -775,6 +842,9 @@ function update(dt) {
   else if (R.queue.length) { R.spawnT -= dt; if (R.spawnT <= 0) { spawnFromQueue(); R.spawnT = BAL.wave.interval(R.wave); } }
 
   R.cd -= dt; R.recoil -= dt; R.hurt = Math.max(0, R.hurt - dt);
+  updateSkills(dt);
+  if (R.rageT > 0 && drag && R.cd <= 0) fire(aimAngle(drag.x, drag.y));
+  const frostMul = R.frostT > 0 && S.frost ? 1 - S.frost.slow : 1;
   if (R.pending !== null && R.cd <= 0) { fire(R.pending); R.pending = null; }
 
   // враги
@@ -791,7 +861,7 @@ function update(dt) {
     if (ab.summon) { e.sumT -= dt; if (e.sumT <= 0) { e.sumT = ab.summon.every * sc.cd;
       for (let k = 0; k < ab.summon.n; k++) R.enemies.push(makeEnemy(ab.summon.id, clampX(e.x + (k ? 30 : -30)), e.y + 6, { minion:true, child:true, hpMul:0.7, sizeMul:0.8 }));
       smoke(e.x, e.y + 10, 8, '120,80,160'); ring(e.x, e.y + 10, 'rgba(200,120,255,.9)', 6, 50, .4, 4); } }
-    let mul = e.slowT > 0 ? 0.55 : 1;
+    let mul = (e.slowT > 0 ? 0.55 : 1) * frostMul;
     if (ab.charge) {
       e.chT -= dt;
       if (e.chState === 'walk' && e.chT <= 0) { e.chState = 'wind'; e.chT = ab.charge.wind; smoke(e.x, e.y + e.size * .4, 4, '200,175,130'); }
@@ -799,7 +869,7 @@ function update(dt) {
       else if (e.chState === 'dash') { mul *= ab.charge.mult; if (Math.random() < dt * 20) smoke(e.x, e.y + e.size * .4, 1, '210,185,140'); if (e.chT <= 0) { e.chState = 'walk'; e.chT = ab.charge.every * sc.cd; } }
     }
     if (ab.ranged && e.y >= e.stopY) {
-      e.stopped = true; e.atkT -= dt;
+      e.stopped = true; e.atkT -= dt * frostMul;
       if (e.atkT <= 0) { e.atkT = ab.ranged.every * sc.cd;
         const tx = L.towerX + (Math.random() - .5) * 30, ty = L.wallY - 30, d = Math.hypot(tx - e.x, ty - e.y), v = 150 * L.scale;
         R.shots.push({ x:e.x, y:e.y, vx:(tx - e.x) / d * v, vy:(ty - e.y) / d * v, dmg:ab.ranged.dmg, dead:false, color:e.t.id === 'drake' ? '#ff7a2f' : '#9be05a' }); burst(e.x, e.y + e.size * .2, e.t.id === 'drake' ? '#ff9a4a' : '#b5ff6a', 6, 90); }
@@ -827,7 +897,7 @@ function update(dt) {
       }
       if (d < e.size * 0.5 + 5) {
         if (e.invuln) continue;
-        a.hits.add(e); hitEnemy(e);
+        a.hits.add(e); hitEnemy(e, a);
         if (a.pierce-- <= 0) { a.dead = true; break; }
       }
     }
@@ -841,15 +911,121 @@ function update(dt) {
 
   // конец волны
   if (state === 'play' && !R.inBreak && !R.queue.length && !R.enemies.length) {
-    const bonus = BAL.wave.clearBonus(R.wave); R.coins += bonus; save.coins += bonus;
-    floatText(W / 2, H * 0.4, `Волна ${R.wave} отбита! +${bonus}`, '#ffe9a0', 20); coinFly(W / 2, H * 0.4, 4);
+    const bonus = Math.round(BAL.wave.clearBonus(R.wave) * S.loot); R.coins += bonus; save.coins += bonus;
+    floatText(W / 2, H * 0.4, `Волна ${R.wave} отбита! +${fmt(bonus)}`, '#ffe9a0', 20); coinFly(W / 2, H * 0.4, 4);
     save.best = Math.max(save.best, R.wave); Store.save(save);
+    if (S.repair && R.hp < S.maxHp) { const h = Math.min(S.repair, S.maxHp - R.hp); R.hp += h; floatText(L.towerX, L.wallY - 60, '+' + h + ' ❤', '#9dff9a', 18); }
     R.wave++; R.inBreak = true; R.breakT = BAL.wave.breakTime;
     const fresh = WaveGen.newAt(R.wave);
     if (fresh) showNewEnemy(fresh);
     else if (R.wave > BAL.postCap.start && (R.wave - BAL.postCap.start) % BAL.postCap.every === 0) { floatText(W / 2, H * 0.48, 'Враги усилились: таланты +1 ранг', '#ffb3a8', 17); }
   }
   updateHud();
+}
+
+/* ---------- НАВЫКИ: метеориты, быстрая перезарядка, ледяная буря ---------- */
+const SKILLS = ['meteor', 'rage', 'frost'];
+function castSkill(id) {
+  if (state !== 'play' || !run) return;
+  const st = S[id];
+  if (!st) { camp('pause', 'skills'); return; }
+  if (run.sk[id] > 0) return;
+  if (id === 'meteor') {
+    if (!run.enemies.length) { floatText(W / 2, H * .45, 'Нет целей', '#fff', 16); return; }
+    for (let i = 0; i < st.n; i++) run.meteorQ.push({ delay:i * .13 });
+    sfx('volley');
+  } else if (id === 'rage') {
+    run.rageT = st.dur; sfx('wave'); const a = archerPos(); ring(a.x, a.y, 'rgba(255,200,70,.95)', 10, 80, .5, 6); burst(a.x, a.y, '#ffd24a', 16, 200);
+  } else if (id === 'frost') {
+    run.frostT = st.dur; sfx('block'); ring(W / 2, H * .5, 'rgba(170,230,255,.9)', 20, Math.max(W, H) * .7, .7, 10);
+    for (const e of run.enemies) for (let k = 0; k < 2; k++) addFx({ k:'ice', x:e.x + (Math.random() - .5) * e.size, y:e.y + (Math.random() - .5) * e.size, vx:0, vy:-12, life:.8, max:.8, r:3 });
+  }
+  run.sk[id] = st.cd; buzz(30);
+}
+function updateSkills(dt) {
+  const R = run;
+  for (const id of SKILLS) R.sk[id] = Math.max(0, R.sk[id] - dt);
+  R.rageT = Math.max(0, R.rageT - dt); R.frostT = Math.max(0, R.frostT - dt);
+  // очередь метеоров
+  for (const q of R.meteorQ) {
+    q.delay -= dt; if (q.delay > 0) continue; q.done = true;
+    const alive = R.enemies.filter(e => !e.dead).sort((a, b) => b.y - a.y).slice(0, 8);
+    const tgt = alive.length ? alive[Math.random() * alive.length | 0] : null;
+    const tx = tgt ? tgt.x + (Math.random() - .5) * 20 : 40 + Math.random() * (W - 80);
+    const ty = tgt ? Math.min(L.wallY - 30, tgt.y + tgt.speed * .5) : L.fieldTop + Math.random() * (L.wallY - L.fieldTop - 60);
+    R.meteors.push({ x0:tx + 140 + Math.random() * 60, y0:-60, tx, ty, x:tx, y:-60, t:0, dur:.55 });
+  }
+  R.meteorQ = R.meteorQ.filter(q => !q.done);
+  for (const m of R.meteors) {
+    m.t += dt / m.dur; const k = Math.min(1, m.t), e = k * k;
+    m.x = m.x0 + (m.tx - m.x0) * e; m.y = m.y0 + (m.ty - m.y0) * e;
+    if (Math.random() < dt * 40) addFx({ k:'ember', x:m.x, y:m.y, vx:(Math.random() - .5) * 30, vy:(Math.random() - .5) * 30, life:.45, max:.45, r:4 + Math.random() * 3, color:Math.random() < .5 ? '#ff7a2e' : '#ffd25a' });
+    if (m.t >= 1) { m.done = true; meteorImpact(m.tx, m.ty); }
+  }
+  R.meteors = R.meteors.filter(m => !m.done);
+  for (const d of R.decals) d.life -= dt;
+  R.decals = R.decals.filter(d => d.life > 0);
+}
+function meteorImpact(x, y) {
+  const st = S.meteor, rad = 58 * L.scale, dmg = S.damage * 8 * st.mult;
+  for (const e of run.enemies) {
+    if (e.dead || e.invuln || Math.hypot(e.x - x, e.y - y) > rad + e.size * .4) continue;
+    if (e.armor > 0) e.armor--;
+    damage(e, dmg * frostBonus(), false);
+  }
+  shake = Math.max(shake, .18); sfx('hurt');
+  ring(x, y, 'rgba(255,170,60,.95)', 6, rad, .4, 7); ring(x, y, 'rgba(255,240,200,.8)', 4, rad * .6, .25, 4);
+  burst(x, y, '#ffb04a', 18, 260); smoke(x, y, 8, '90,70,60');
+  run.decals.push({ x, y, r:rad * .55, life:3, max:3 });
+}
+function frostBonus() { return run && run.frostT > 0 && S.frost ? S.frost.mult : 1; }
+function drawDecals() { for (const d of run.decals) { const k = d.life / d.max; ctx.fillStyle = `rgba(40,25,20,${.35 * k})`; ctx.beginPath(); ctx.ellipse(d.x, d.y + 6, d.r, d.r * .45, 0, 0, TAU); ctx.fill(); } }
+function drawSkillsWorld() {
+  const R = run;
+  for (const m of R.meteors) {
+    const ang = Math.atan2(m.ty - m.y0, m.tx - m.x0);
+    // тень-прицел на земле
+    ctx.strokeStyle = `rgba(255,120,40,${.3 + .5 * m.t})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(m.tx, m.ty + 6, 58 * L.scale * (1 - Math.min(1, m.t) * .4), 20 * L.scale * (1 - Math.min(1, m.t) * .4), 0, 0, TAU); ctx.stroke();
+    ctx.globalCompositeOperation = 'lighter';
+    const tx = m.x - Math.cos(ang) * 70, ty = m.y - Math.sin(ang) * 70, gr = ctx.createLinearGradient(tx, ty, m.x, m.y);
+    gr.addColorStop(0, 'rgba(255,90,20,0)'); gr.addColorStop(1, 'rgba(255,190,80,.9)'); ctx.strokeStyle = gr; ctx.lineWidth = 12; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(m.x, m.y); ctx.stroke();
+    const g2 = ctx.createRadialGradient(m.x, m.y, 2, m.x, m.y, 22); g2.addColorStop(0, '#fff6d0'); g2.addColorStop(.4, 'rgba(255,150,50,.9)'); g2.addColorStop(1, 'rgba(255,80,20,0)');
+    ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(m.x, m.y, 22, 0, TAU); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    blob(ctx, m.x, m.y, 8, 8, '#8a6a5a', '#3a2620', 2);
+  }
+}
+function drawSkillsScreen() {
+  const R = run;
+  if (R.frostT > 0) {
+    const k = Math.min(1, R.frostT / .5), gr = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
+    gr.addColorStop(0, 'rgba(160,220,255,0)'); gr.addColorStop(1, `rgba(160,220,255,${.4 * k})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = `rgba(255,255,255,${.75 * k})`;
+    for (let i = 0; i < 40; i++) { const x = (i * 97.3 + Math.sin(time + i) * 20) % W, y = (i * 53.7 + time * (30 + i % 5 * 8)) % H; ctx.beginPath(); ctx.arc(x, y, 1.2 + i % 3 * .6, 0, TAU); ctx.fill(); }
+  }
+  if (R.rageT > 0) {
+    const k = Math.min(1, R.rageT / .5), gr = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .4, W / 2, H / 2, Math.max(W, H) * .75);
+    gr.addColorStop(0, 'rgba(255,190,60,0)'); gr.addColorStop(1, `rgba(255,170,40,${.28 * k})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+  }
+}
+function drawArcherAura() {
+  if (!run || run.rageT <= 0) return;
+  const a = archerPos(); ctx.globalCompositeOperation = 'lighter';
+  const r = 34 + Math.sin(time * 12) * 4, gr = ctx.createRadialGradient(a.x, a.y, 6, a.x, a.y, r);
+  gr.addColorStop(0, 'rgba(255,210,90,.5)'); gr.addColorStop(1, 'rgba(255,160,40,0)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(a.x, a.y, r, 0, TAU); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+}
+const skillCache = {};
+function updateSkillButtons() {
+  for (const id of SKILLS) {
+    const el = document.getElementById('sk-' + id); if (!el) continue;
+    const st = S[id], locked = !st, cd = run ? run.sk[id] : 0, active = run && ((id === 'rage' && run.rageT > 0) || (id === 'frost' && run.frostT > 0));
+    const p = locked ? 0 : Math.round(cd / st.cd * 100) / 100, n = cd > 0 ? Math.ceil(cd) : '';
+    const key = `${locked}|${p}|${n}|${active}`; if (skillCache[id] === key) continue; skillCache[id] = key;
+    el.classList.toggle('locked', locked); el.classList.toggle('ready', !locked && cd <= 0); el.classList.toggle('active', !!active);
+    el.style.setProperty('--p', p); el.querySelector('.cdn').textContent = n;
+  }
 }
 
 /* ---------- отрисовка ---------- */
@@ -863,16 +1039,20 @@ function render() {
     const R = run;
     // наземные телеграфы и тени
     for (const e of R.enemies) drawGround(e);
+    drawDecals();
     const ens = R.enemies.slice().sort((a, b) => a.y - b.y);
     for (const e of ens) drawEnemy(e);
     for (const s of R.shots) drawShot(s);
     for (const a of R.arrows) drawArrow(a);
+    drawSkillsWorld();
   }
   drawAmbientFront();
+  drawArcherAura();
   drawArcher();
   if (run) { drawFx(); drawTexts(); }
   ctx.restore();
   if (vig) ctx.drawImage(vig, 0, 0, W, H);
+  if (run) drawSkillsScreen();
   if (run && run.hurt > 0) {
     const a = run.hurt / .45, gr = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .7);
     gr.addColorStop(0, 'rgba(200,30,30,0)'); gr.addColorStop(1, `rgba(200,30,30,${.45 * a})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
@@ -885,7 +1065,7 @@ function drawGround(e) {
   if (e.slowT > 0) { ctx.strokeStyle = 'rgba(150,225,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, fy, e.size * .45, e.size * .15, 0, 0, TAU); ctx.stroke(); }
   if (ab.summon && e.sumT < 1) { const k = 1 - e.sumT;
     ctx.save(); ctx.translate(e.x, fy); ctx.scale(1, .35); ctx.rotate(time * 2);
-    ctx.strokeStyle = `rgba(170,90,230,${.4 + k * .5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, e.size * (.6 + k * .5), 0, TAU); ctx.stroke();
+    ctx.strokeStyle = `rgba(170,90,230,${.4 + k * .5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, Math.max(0, e.size * (.6 + k * .5)), 0, TAU); ctx.stroke();
     for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; ctx.fillStyle = '#c98cff'; ctx.fillRect(Math.cos(a) * e.size * (.6 + k * .5) - 2, Math.sin(a) * e.size * (.6 + k * .5) - 2, 4, 4); }
     ctx.restore(); }
   if (ab.heal && e.healT < .8) { const k = 1 - e.healT / .8;
@@ -934,7 +1114,7 @@ function drawShot(s) {
   ctx.globalCompositeOperation = 'source-over';
 }
 function drawArrow(a) {
-  const ang = Math.atan2(a.vy, a.vx), col = ARROW_COL[S.arrowType], len = save.fx === 'low' ? 26 : 46;
+  const ang = Math.atan2(a.vy, a.vx), col = a.rage ? '#ffcf4a' : ARROW_COL[S.arrowType], len = save.fx === 'low' ? 26 : 46;
   ctx.globalCompositeOperation = 'lighter';
   const tx = a.x - Math.cos(ang) * len, ty = a.y - Math.sin(ang) * len, gr = ctx.createLinearGradient(tx, ty, a.x, a.y);
   gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, col); ctx.strokeStyle = gr; ctx.lineWidth = 4; ctx.lineCap = 'round';
@@ -986,10 +1166,10 @@ function drawFx() {
     const k = Math.max(0, p.life / p.max);
     if (p.k === 'spark') { ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = p.color; ctx.globalAlpha = k; ctx.lineWidth = p.r; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * .04, p.y - p.vy * .04); ctx.stroke(); }
-    else if (p.k === 'smoke') { ctx.globalAlpha = k * .7; ctx.fillStyle = `rgb(${p.color})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
+    else if (p.k === 'smoke') { ctx.globalAlpha = k * .7; ctx.fillStyle = `rgb(${p.color})`; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.r), 0, TAU); ctx.fill(); }
     else if (p.k === 'ring') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k; ctx.strokeStyle = p.color; ctx.lineWidth = p.w * k + .5;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r1 + (p.r0 - p.r1) * k, 0, TAU); ctx.stroke(); }
-    else if (p.k === 'ember' || p.k === 'heal') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (.5 + k * .5), 0, TAU); ctx.fill(); }
+      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.r1 + (p.r0 - p.r1) * k), 0, TAU); ctx.stroke(); }
+    else if (p.k === 'ember' || p.k === 'heal') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.r * (.5 + k * .5)), 0, TAU); ctx.fill(); }
     else if (p.k === 'ice') { ctx.globalAlpha = k; ctx.fillStyle = '#c9f1ff'; ctx.beginPath(); ctx.moveTo(p.x, p.y - 4); ctx.lineTo(p.x + 3, p.y); ctx.lineTo(p.x, p.y + 4); ctx.lineTo(p.x - 3, p.y); ctx.fill(); }
     else if (p.k === 'ghost') { ctx.globalAlpha = k * .5; blit(p.spr, p.x, p.y); }
     else if (p.k === 'coin') { ctx.globalAlpha = Math.min(1, k * 4); const sx = Math.abs(Math.cos(time * 12 + p.x0)) * .8 + .2;
@@ -1051,7 +1231,8 @@ function updateHud(force) {
   if (!run) return;
   const set = (k, v, fn) => { if (force || hudCache[k] !== v) { hudCache[k] = v; fn(v); } };
   set('w', run.wave, v => $('#hWave').textContent = 'Волна ' + v);
-  set('c', save.coins, v => $('#hCoins').innerHTML = '<i class="coin"></i>' + v);
+  set('c', fmt(save.coins), v => $('#hCoins').innerHTML = '<i class="coin"></i>' + v);
+  updateSkillButtons();
   set('h', run.hp + '/' + S.maxHp, v => { $('#hHpN').textContent = v; $('#hHp').style.width = (100 * run.hp / S.maxHp) + '%'; });
 }
 function showGameUI(on) { $('#hud').hidden = !on; $('#bottom').hidden = !on; $('#hint').hidden = !(on && hintShown); }
@@ -1059,18 +1240,18 @@ function openOverlay(html) { $('#card').innerHTML = html; $('#ov').hidden = fals
 function closeOverlay() { $('#ov').hidden = true; }
 function on(id, fn) { const el = document.getElementById(id); if (el) el.onclick = fn; }
 
-function checkpoints() { const out = [1]; for (let w = 10; w <= Math.min(save.best, 9999); w += 10) out.push(w); return out; }
+function checkpoints() { const out = [1], top = Math.floor(save.best / 10) * 10; for (let w = 100; w < top - 40; w += 100) out.push(w); for (let w = Math.max(10, top - 40); w <= top; w += 10) if (!out.includes(w)) out.push(w); return out; }
 let chosenStart = 1, testOpen = false, resetArm = false;
 
 function menu() {
   state = 'menu'; showGameUI(false); run = null;
   const cps = checkpoints(); if (!cps.includes(chosenStart) && !testOpen) chosenStart = 1;
-  const testWaves = [1, 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550];
+  const testWaves = [1, 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 800, 1000];
   openOverlay(`
-    <div class="label">Прототип · сборка 0.3</div>
+    <div class="label">Прототип · сборка 0.4</div>
     <h1>Башенный лучник</h1>
     <p class="muted">Защищай башню: веди пальцем к цели и отпускай. Иногда лук выпускает веер из пяти стрел.</p>
-    <div class="stats"><span class="stat"><i class="coin"></i>${save.coins}</span><span class="stat">Рекорд: волна ${save.best}</span></div>
+    <div class="stats"><span class="stat"><i class="coin"></i>${fmt(save.coins)}</span><span class="stat">Рекорд: волна ${save.best}</span></div>
     <div class="stack"><span class="label">Начать с волны</span>
       <div class="waves" id="cps">${cps.map(w => `<button data-w="${w}" class="${w === chosenStart ? 'on' : ''}">${w}</button>`).join('')}</div>
       <span class="muted">Контрольные точки открываются каждые 10 пройденных волн.</span></div>
@@ -1080,7 +1261,7 @@ function menu() {
     <details id="test" ${testOpen ? 'open' : ''}><summary>Панель тестировщика</summary><div class="stack">
       <span class="muted">Старт с волны открытия любого врага (без проверки рекорда):</span>
       <div class="waves" id="tw">${testWaves.map(w => `<button data-w="${w}" class="${w === chosenStart ? 'on' : ''}">${w}</button>`).join('')}</div>
-      <div class="row2"><button class="btn ghost" id="tCoins">+1000<i class="coin"></i></button><button class="btn ghost" id="tReset">${resetArm ? 'Точно сбросить?' : 'Сбросить прогресс'}</button></div>
+      <div class="row2"><button class="btn ghost" id="tCoins">Монеты ×10</button><button class="btn ghost" id="tReset">${resetArm ? 'Точно сбросить?' : 'Сбросить прогресс'}</button></div>
       <span class="muted">Сохранение: схема v${save.v}, браузер этого устройства.</span>
     </div></details>`);
   const pick = e => { const b = e.target.closest("button[data-w]"); if (!b) return; chosenStart = +b.dataset.w; if (e.currentTarget.id === "tw") testOpen = true; menu(); };
@@ -1090,37 +1271,47 @@ function menu() {
   on('mCamp', () => camp('menu'));
   on('mSound', () => { save.sound = !save.sound; Store.save(save); menu(); });
   on('mFx', () => { save.fx = save.fx === 'low' ? 'high' : 'low'; Store.save(save); menu(); });
-  on('tCoins', () => { save.coins += 1000; Store.save(save); menu(); });
+  on('tCoins', () => { save.coins = Math.max(1000, save.coins * 10); Store.save(save); menu(); });
   on('tReset', () => { if (!resetArm) { resetArm = true; menu(); return; } resetArm = false; save = Store.fresh(); Store.save(save); S = Progress.stats(save.ups); chosenStart = 1; menu(); });
 }
 
 let campTab = 'character';
-function camp(from) {
+let buyMode = 1;
+function bulk(u, l, coins) {   // сколько уровней купить и за сколько
+  let n = 0, total = 0; const want = buyMode === 0 ? 1e4 : buyMode;
+  while (n < want) { const c = Math.ceil(u.cost(l + n)); if (total + c > coins) break; total += c; n++; }
+  if (n === 0) return { n:0, total:Math.ceil(u.cost(l)) };
+  return { n, total };
+}
+function camp(from, tab) {
   if (state === 'play') state = 'paused';
+  if (tab) campTab = tab;
   const br = UPGRADES[campTab];
   openOverlay(`
-    <div class="label">Улучшения сохраняются между забегами</div>
+    <div class="label">Улучшения сохраняются между забегами и не имеют предела</div>
     <h2>Лагерь лучника</h2>
-    <div class="stats"><span class="stat"><i class="coin"></i>${save.coins}</span></div>
+    <div class="stats" style="justify-content:space-between;align-items:center"><span class="stat"><i class="coin"></i>${fmt(save.coins)}</span>
+      <span class="buymode" id="bm">${[[1, '×1'], [10, '×10'], [0, 'Макс']].map(([m, t]) => `<button data-m="${m}" class="${m === buyMode ? 'on' : ''}">${t}</button>`).join('')}</span></div>
     <div class="tabs" id="tabs">${Object.entries(UPGRADES).map(([k, b]) => `<button data-t="${k}" class="${k === campTab ? 'on' : ''}">${b.title}</button>`).join('')}</div>
-    <div>${br.items.map(u => { const l = save.ups[u.id], maxed = l >= u.max, c = u.cost(l);
-      return `<div class="up"><div><b>${u.name}</b><span class="lv">ур. ${l}/${u.max}</span></div>
-        <div class="d">${u.fx(l)}${maxed ? ' · максимум' : '<br>→ <b style="color:#1f2a44">' + u.fx(l + 1) + '</b>'}</div>
-        <button class="btn" data-u="${u.id}" ${maxed || save.coins < c ? 'disabled' : ''}>${maxed ? 'MAX' : '<i class="coin"></i>' + c}</button></div>`; }).join('')}</div>
+    <div>${br.items.map(u => { const l = save.ups[u.id], b = bulk(u, l, save.coins), next = l + Math.max(1, b.n);
+      return `<div class="up"><div><b>${u.name}</b><span class="lv">ур. ${l}</span></div>
+        <div class="d">${u.fx(l)}<br>→ <b style="color:#1f2a44">${u.fx(next)}</b></div>
+        <button class="btn" data-u="${u.id}" ${b.n ? '' : 'disabled'}>${b.n > 1 ? '+' + b.n + ' · ' : ''}<i class="coin"></i>${fmt(b.total)}</button></div>`; }).join('')}</div>
     <button class="btn big" id="cBack">${from === 'menu' ? '← В меню' : '▶ Вернуться в бой'}</button>`);
   $('#tabs').onclick = e => { const b = e.target.closest('button[data-t]'); if (b) { campTab = b.dataset.t; camp(from); } };
+  $('#bm').onclick = e => { const b = e.target.closest('button[data-m]'); if (b) { buyMode = +b.dataset.m; camp(from); } };
   $('#card').querySelectorAll('button[data-u]').forEach(b => b.onclick = () => {
-    const u = UP[b.dataset.u], l = save.ups[u.id], c = u.cost(l); if (save.coins < c || l >= u.max) return;
-    save.coins -= c; save.ups[u.id]++; Store.save(save); sfx('buy');
+    const u = UP[b.dataset.u], l = save.ups[u.id], r = bulk(u, l, save.coins); if (!r.n) return;
+    save.coins -= r.total; save.ups[u.id] += r.n; Store.save(save); sfx('buy');
     const oldMax = S.maxHp; S = Progress.stats(save.ups); if (run) run.hp += S.maxHp - oldMax;
-    camp(from);
+    const sc = $('#card').scrollTop; camp(from); $('#card').scrollTop = sc;
   });
   on('cBack', () => { if (from === 'menu') menu(); else resume(); });
 }
 
 function pause() {
   if (state !== 'play') return; state = 'paused'; drag = null;
-  openOverlay(`<h2>Пауза</h2><p class="muted">Волна ${run.wave} · убито ${run.kills} · заработано <i class="coin"></i>${run.coins}</p>
+  openOverlay(`<h2>Пауза</h2><p class="muted">Волна ${run.wave} · убито ${run.kills} · заработано <i class="coin"></i>${fmt(run.coins)}</p>
     <button class="btn big" id="pRes">▶ Продолжить</button>
     <div class="row2"><button class="btn ghost" id="pCamp">⚒ Лагерь</button><button class="btn ghost" id="pMenu">Выйти в меню</button></div>`);
   on('pRes', resume); on('pCamp', () => camp('pause')); on('pMenu', () => { Store.save(save); menu(); });
@@ -1140,10 +1331,10 @@ function gameOver() {
   state = 'over'; drag = null; save.best = Math.max(save.best, run.wave - 1); Store.save(save);
   const R = run;
   openOverlay(`<div class="label">Забег окончен</div><h2>Башня пала</h2>
-    <div class="stats"><span class="stat">Волна ${R.wave}</span><span class="stat">Убито ${R.kills}</span><span class="stat">+<i class="coin"></i>${R.coins}</span></div>
+    <div class="stats"><span class="stat">Волна ${R.wave}</span><span class="stat">Убито ${R.kills}</span><span class="stat">+<i class="coin"></i>${fmt(R.coins)}</span></div>
     <div class="stack">
       ${R.continued ? '' : '<button class="btn ad" id="oCont">▶ Продолжить забег (реклама)</button>'}
-      ${R.doubled || R.coins <= 0 ? '' : `<button class="btn ad" id="oDouble">▶ Удвоить награду: +${R.coins}<i class="coin"></i></button>`}
+      ${R.doubled || R.coins <= 0 ? '' : `<button class="btn ad" id="oDouble">▶ Удвоить награду: +${fmt(R.coins)}<i class="coin"></i></button>`}
     </div>
     <div class="row2"><button class="btn" id="oCamp">⚒ Лагерь</button><button class="btn" id="oAgain">↻ Заново</button></div>
     <button class="btn ghost" id="oMenu">В меню</button>`);
@@ -1157,6 +1348,7 @@ function gameOver() {
 
 $('#bPause').onclick = pause;
 $('#bCamp').onclick = () => { if (state === 'play') camp('pause'); };
+for (const id of SKILLS) $('#sk-' + id).onclick = () => castSkill(id);
 
 /* ---------- Android: пауза при сворачивании, экран не гаснет ---------- */
 document.addEventListener('visibilitychange', () => { if (document.hidden) { if (state === 'play') pause(); Store.save(save); } else requestWakeLock(); });
