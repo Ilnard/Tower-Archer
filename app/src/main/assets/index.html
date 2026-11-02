@@ -778,103 +778,104 @@ function drawAmbientFront() {
 
 /* ---------- ЗВУК: синтезатор на Web Audio. Все звуки и музыка генерируются кодом, файлов нет ---------- */
 const Snd = {
-  ctx:null, master:null, sfxBus:null, musBus:null, rev:null, noise:null, plucks:new Map(), last:{},
+  ctx:null, master:null, sfxBus:null, musBus:null, rev:null, noise:null, last:{},
   init() {
     if (this.ctx) { if (this.ctx.state === 'suspended' && !document.hidden) this.ctx.resume(); return true; }
     try {
       const C = new (window.AudioContext || window.webkitAudioContext)(); this.ctx = C;
-      const comp = C.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4; comp.connect(C.destination);
-      this.master = C.createGain(); this.master.gain.value = .9; this.master.connect(comp);
-      this.sfxBus = C.createGain(); this.musBus = C.createGain(); this.sfxBus.connect(this.master); this.musBus.connect(this.master);
+      const comp = C.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3; comp.connect(C.destination);
+      // общий срез гула ниже 70 Гц и мягкий срез верхов
+      const hp = C.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 70;
+      const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9000;
+      this.master = C.createGain(); this.master.gain.value = .85; this.master.connect(hp); hp.connect(lp); lp.connect(comp);
+      this.sfxBus = C.createGain(); this.sfxBus.connect(this.master);
+      // у музыки дополнительно убираем низ ниже 140 Гц — никакого гудящего баса
+      const mhp = C.createBiquadFilter(); mhp.type = 'highpass'; mhp.frequency.value = 140; mhp.Q.value = .5;
+      this.musBus = C.createGain(); this.musBus.connect(mhp); mhp.connect(this.master);
       this.setVolumes(true);
-      // реверберация: импульс из затухающего шума
-      const len = C.sampleRate * 1.8 | 0, ir = C.createBuffer(2, len, C.sampleRate);
-      for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3; }
-      this.rev = C.createConvolver(); this.rev.buffer = ir; const rg = C.createGain(); rg.gain.value = .3; this.rev.connect(rg).connect(this.master);
+      const len = C.sampleRate * 2.2 | 0, ir = C.createBuffer(2, len, C.sampleRate);
+      for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 2.5; }
+      this.rev = C.createConvolver(); this.rev.buffer = ir; const rg = C.createGain(); rg.gain.value = .28; this.rev.connect(rg).connect(this.master);
       const nb = C.createBuffer(1, C.sampleRate, C.sampleRate), nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1; this.noise = nb;
       return true;
     } catch { return false; }
   },
   setVolumes(now) {
     if (!this.ctx) return; const t = this.ctx.currentTime, quiet = state === 'paused' || state === 'over';
-    const s = save.sound ? .8 : 0, m = save.music ? (quiet ? .16 : .4) : 0;
+    const s = save.sound ? .75 : 0, m = save.music ? (quiet ? .14 : .34) : 0;
     if (now) { this.sfxBus.gain.value = s; this.musBus.gain.value = m; }
     else { this.sfxBus.gain.setTargetAtTime(s, t, .05); this.musBus.gain.setTargetAtTime(m, t, .4); }
   },
   ok() { return this.ctx && this.ctx.state === 'running'; },
   env(g, t, vol, at, dur) { g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + at); g.gain.exponentialRampToValueAtTime(.0001, t + dur); },
   out(node, dest, wet) { node.connect(dest || this.sfxBus); if (wet) { const w = this.ctx.createGain(); w.gain.value = wet; node.connect(w); w.connect(this.rev); } },
-  tone({ type = 'sine', f, dur, vol = .2, at = .005, delay = 0, lp, hp, q = 1, vib, dest, wet = 0 }) {
-    const C = this.ctx, t = C.currentTime + delay, o = C.createOscillator(), g = C.createGain(), fs = Array.isArray(f) ? f : [f];
+  tone({ type = 'sine', f, dur, vol = .2, at = .005, delay = 0, lp, hp, q = .7, vib, dest, wet = 0 }) {
+    const C = this.ctx, t = C.currentTime + Math.max(0, delay), o = C.createOscillator(), g = C.createGain(), fs = Array.isArray(f) ? f : [f];
     o.type = type; o.frequency.setValueAtTime(fs[0], t);
-    for (let i = 1; i < fs.length; i++) o.frequency.exponentialRampToValueAtTime(Math.max(20, fs[i]), t + dur * i / (fs.length - 1));
+    for (let i = 1; i < fs.length; i++) o.frequency.exponentialRampToValueAtTime(Math.max(30, fs[i]), t + dur * i / (fs.length - 1));
     if (vib) { const l = C.createOscillator(), lg = C.createGain(); l.frequency.value = vib[0]; lg.gain.value = vib[1]; l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur + .05); }
     let n = o; if (lp || hp) { const fl = C.createBiquadFilter(); fl.type = lp ? 'lowpass' : 'highpass'; fl.frequency.value = lp || hp; fl.Q.value = q; o.connect(fl); n = fl; }
     this.env(g, t, vol, at, dur); n.connect(g); this.out(g, dest, wet); o.start(t); o.stop(t + dur + .05);
   },
   hiss({ dur, vol = .2, at = .003, delay = 0, type = 'bandpass', f = 1000, f1, q = 1, dest, wet = 0 }) {
-    const C = this.ctx, t = C.currentTime + delay, s = C.createBufferSource(), fl = C.createBiquadFilter(), g = C.createGain();
+    const C = this.ctx, t = C.currentTime + Math.max(0, delay), s = C.createBufferSource(), fl = C.createBiquadFilter(), g = C.createGain();
     s.buffer = this.noise; s.loop = true; fl.type = type; fl.frequency.setValueAtTime(f, t); if (f1) fl.frequency.exponentialRampToValueAtTime(f1, t + dur); fl.Q.value = q;
     this.env(g, t, vol, at, dur); s.connect(fl).connect(g); this.out(g, dest, wet); s.start(t, Math.random() * .5); s.stop(t + dur + .05);
   },
-  // щипковая струна (алгоритм Карплуса–Стронга), буферы кешируются
-  pluck(freq, { vol = .25, delay = 0, dest, decay = .996, bright = .5, wet = .2, at } = {}) {
-    const C = this.ctx, key = Math.round(freq * 10) + '|' + decay + '|' + bright; let buf = this.plucks.get(key);
-    if (!buf) {
-      const sr = C.sampleRate, len = sr * 1.6 | 0, N = Math.max(2, Math.round(sr / freq)); buf = C.createBuffer(1, len, sr); const d = buf.getChannelData(0);
-      let prev = 0; for (let i = 0; i < N; i++) { const r = Math.random() * 2 - 1; prev = prev + bright * (r - prev); d[i] = prev; }
-      for (let i = N; i < len; i++) d[i] = decay * .5 * (d[i - N] + d[i - N - 1 < 0 ? 0 : i - N - 1]);
-      this.plucks.set(key, buf);
-    }
-    const t = (at ?? C.currentTime) + delay, s = C.createBufferSource(), g = C.createGain(); s.buffer = buf; g.gain.value = vol;
-    s.connect(g); this.out(g, dest, wet); s.start(t);
+  // арфа/колокольчик: чистые синусы с затухающими обертонами — без жужжания
+  harp(f, { vol = .1, delay = 0, dur = 1.4, dest, wet = .3 } = {}) {
+    this.tone({ f, dur, vol, at:.004, delay, dest, wet });
+    this.tone({ f:f * 2, dur:dur * .55, vol:vol * .32, at:.003, delay, dest, wet });
+    this.tone({ f:f * 3, dur:dur * .3, vol:vol * .1, at:.002, delay, dest });
   },
   throttle(k, gap) { const t = performance.now(); if (this.last[k] && t - this.last[k] < gap * 1000) return false; this.last[k] = t; return true; },
 };
 const mtof = m => 440 * 2 ** ((m - 69) / 12);
 
 const SFX = {
-  shoot() { Snd.pluck(98, { vol:.3, decay:.985, bright:.95, wet:.05 }); Snd.hiss({ dur:.13, vol:.09, type:'highpass', f:2600, f1:900 }); Snd.tone({ type:'triangle', f:[900, 280], dur:.08, vol:.04 }); },
-  volley() { SFX.shoot(); for (let i = 1; i < 4; i++) Snd.hiss({ dur:.12, vol:.06, type:'highpass', f:3000 - i * 400, f1:900, delay:i * .03 }); Snd.tone({ type:'triangle', f:[700, 1400], dur:.18, vol:.05, delay:.02, wet:.2 }); },
-  hit() { Snd.hiss({ dur:.07, vol:.2, f:1300, q:.8 }); Snd.tone({ f:[170, 60], dur:.1, vol:.16 }); },
-  block() { for (const [f, v] of [[1250, .06], [1870, .05], [2740, .035]]) Snd.tone({ f, dur:.4, vol:v, wet:.3 }); Snd.hiss({ dur:.04, vol:.1, type:'highpass', f:4000 }); },
-  kill() { Snd.tone({ type:'triangle', f:[380, 900], dur:.13, vol:.08 }); Snd.hiss({ dur:.22, vol:.07, type:'lowpass', f:900, f1:200 }); },
-  coin() { Snd.tone({ f:1568, dur:.1, vol:.05 }); Snd.tone({ f:2093, dur:.22, vol:.05, delay:.06, wet:.25 }); },
-  hurt() { Snd.tone({ f:[110, 42], dur:.38, vol:.35 }); Snd.hiss({ dur:.3, vol:.22, type:'lowpass', f:700, f1:150 }); Snd.hiss({ dur:.05, vol:.14, f:2600, q:1.5 }); },
-  wave() { Snd.tone({ type:'sawtooth', f:196, dur:.42, vol:.08, lp:900, at:.04, wet:.35 }); Snd.tone({ type:'sawtooth', f:294, dur:.75, vol:.08, lp:1100, at:.04, delay:.3, wet:.35 }); Snd.tone({ type:'sawtooth', f:147, dur:1, vol:.05, lp:500, at:.06, delay:.3 }); },
-  clear() { [392, 494, 587, 784].forEach((f, i) => Snd.pluck(f, { vol:.2, delay:i * .07, wet:.3 })); },
-  buy() { [1047, 1319, 1568].forEach((f, i) => Snd.tone({ f, dur:.16, vol:.06, delay:i * .05, wet:.2 })); },
-  click() { Snd.tone({ type:'triangle', f:[700, 900], dur:.06, vol:.05 }); },
-  spit() { Snd.hiss({ dur:.14, vol:.1, f:1500, f1:500, q:2 }); Snd.tone({ f:[520, 200], dur:.12, vol:.05 }); },
-  shotDown() { Snd.tone({ type:'square', f:[1300, 600], dur:.08, vol:.035 }); },
-  meteorCast() { Snd.hiss({ dur:.7, vol:.14, f:250, f1:2600, q:2.5, wet:.3 }); Snd.tone({ type:'sawtooth', f:[80, 160], dur:.7, vol:.06, lp:400 }); },
-  meteorFall() { Snd.hiss({ dur:.5, vol:.07, f:3200, f1:350, q:3 }); },
-  boom() { Snd.tone({ f:[95, 28], dur:.75, vol:.5 }); Snd.hiss({ dur:.65, vol:.32, type:'lowpass', f:1000, f1:120, wet:.3 }); Snd.hiss({ dur:.08, vol:.15, f:2400 }); },
-  rage() { Snd.tone({ type:'sawtooth', f:[180, 900], dur:.5, vol:.08, lp:2200 }); [523, 659, 784, 1047].forEach((f, i) => Snd.tone({ type:'triangle', f, dur:.7, vol:.04, delay:.3 + i * .04, wet:.35 })); },
-  frost() { for (let i = 0; i < 9; i++) Snd.tone({ f:1800 + Math.random() * 1800, dur:.7, vol:.025, delay:i * .04, wet:.6 }); Snd.hiss({ dur:1, vol:.08, type:'highpass', f:7000, f1:1800, wet:.4 }); Snd.tone({ type:'triangle', f:[440, 220], dur:.9, vol:.05, wet:.4 }); },
-  defeat() { Snd.tone({ type:'sawtooth', f:[220, 110], dur:1.2, vol:.08, lp:700, wet:.4 }); [294, 277, 262, 220].forEach((f, i) => Snd.pluck(f, { vol:.2, delay:.15 + i * .22, wet:.4 })); },
+  // лук: щелчок тетивы + свист стрелы, без низких частот
+  shoot() { Snd.hiss({ dur:.016, vol:.28, type:'highpass', f:4200 }); Snd.tone({ type:'triangle', f:[440, 250], dur:.08, vol:.2, lp:1800 }); Snd.hiss({ dur:.22, vol:.24, f:2200, f1:650, q:1.3, delay:.01 }); },
+  volley() { Snd.hiss({ dur:.014, vol:.14, type:'highpass', f:4500 }); Snd.tone({ type:'triangle', f:[440, 260], dur:.08, vol:.08, lp:1800 });
+    for (let i = 0; i < 5; i++) Snd.hiss({ dur:.22, vol:.05, f:2600 - i * 250, f1:700, q:1.6, delay:.01 + i * .025 }); Snd.harp(1175, { vol:.035, delay:.03, dur:.5 }); },
+  hit() { Snd.hiss({ dur:.06, vol:.13, f:1500, q:.9 }); Snd.tone({ f:[260, 140], dur:.07, vol:.08 }); },
+  block() { for (const [f, v] of [[1250, .045], [1870, .035], [2740, .025]]) Snd.tone({ f, dur:.35, vol:v, wet:.3 }); Snd.hiss({ dur:.03, vol:.07, type:'highpass', f:4000 }); },
+  kill() { Snd.tone({ f:[520, 980], dur:.09, vol:.06 }); Snd.hiss({ dur:.18, vol:.05, f:900, f1:300, q:.7 }); },
+  coin() { Snd.tone({ f:1568, dur:.09, vol:.04 }); Snd.tone({ f:2093, dur:.2, vol:.04, delay:.06, wet:.25 }); },
+  hurt() { Snd.tone({ f:[180, 90], dur:.22, vol:.16 }); Snd.hiss({ dur:.22, vol:.14, f:700, f1:250, q:.8 }); Snd.hiss({ dur:.04, vol:.08, f:2400, q:1.2 }); },
+  wave() { [587, 740, 880].forEach((f, i) => Snd.tone({ type:'triangle', f, dur:.55 - i * .08, vol:.045, at:.03, lp:2000, delay:i * .12, wet:.4 })); },
+  clear() { [784, 988, 1175, 1568].forEach((f, i) => Snd.harp(f, { vol:.06, delay:i * .07, dur:.9 })); },
+  buy() { [1047, 1319, 1568].forEach((f, i) => Snd.tone({ f, dur:.14, vol:.045, delay:i * .05, wet:.2 })); },
+  click() { Snd.tone({ f:[900, 1100], dur:.04, vol:.035 }); },
+  spit() { Snd.hiss({ dur:.13, vol:.07, f:1500, f1:500, q:2 }); },
+  shotDown() { Snd.tone({ f:[1400, 700], dur:.07, vol:.035 }); },
+  meteorCast() { Snd.hiss({ dur:.8, vol:.1, f:300, f1:2400, q:2.5, wet:.3 }); Snd.harp(440, { vol:.05, dur:.8 }); Snd.harp(659, { vol:.04, dur:.8, delay:.08 }); },
+  meteorFall() { Snd.hiss({ dur:.5, vol:.05, f:3000, f1:500, q:3 }); },
+  boom() { Snd.tone({ f:[160, 60], dur:.45, vol:.22 }); Snd.hiss({ dur:.55, vol:.2, f:900, f1:180, q:.6, wet:.3 }); Snd.hiss({ dur:.06, vol:.1, f:2600 }); },
+  rage() { Snd.hiss({ dur:.4, vol:.06, f:600, f1:3000, q:2 }); [523, 659, 784, 1047].forEach((f, i) => Snd.harp(f, { vol:.05, delay:.12 + i * .05, dur:.9 })); },
+  frost() { for (let i = 0; i < 9; i++) Snd.tone({ f:1800 + Math.random() * 1800, dur:.7, vol:.02, delay:i * .04, wet:.6 }); Snd.hiss({ dur:.9, vol:.06, type:'highpass', f:7000, f1:2000, wet:.4 }); },
+  defeat() { [587, 554, 523, 440].forEach((f, i) => Snd.harp(f, { vol:.07, delay:i * .25, dur:1.4 })); },
 };
-// голоса врагов: при появлении (с вероятностью) и при применении способностей
+// голоса врагов: только мягкие тембры (синус/треугольник + фильтр + шум)
 const VOICE = {
-  goblin()  { Snd.tone({ type:'square', f:[650, 1150, 600], dur:.16, vol:.04, lp:2600 }); },
-  wolf()    { Snd.tone({ f:[380, 760, 560], dur:.6, vol:.07, vib:[6, 18], wet:.35 }); },
-  ogre()    { Snd.tone({ type:'sawtooth', f:[100, 72], dur:.32, vol:.11, lp:520 }); Snd.hiss({ dur:.22, vol:.05, type:'lowpass', f:420 }); },
-  knight()  { Snd.tone({ f:900, dur:.22, vol:.04, wet:.2 }); Snd.tone({ f:1360, dur:.18, vol:.03, delay:.05 }); Snd.hiss({ dur:.05, vol:.06, type:'highpass', f:3500 }); },
-  shaman()  { Snd.tone({ type:'triangle', f:[220, 232], dur:.7, vol:.05, vib:[5, 6], wet:.45 }); Snd.tone({ type:'triangle', f:[330, 318], dur:.7, vol:.035, wet:.45 }); },
-  slime()   { Snd.tone({ f:[270, 90], dur:.2, vol:.11, vib:[24, 40] }); },
-  phantom() { Snd.tone({ f:[340, 250], dur:.85, vol:.05, vib:[4, 12], wet:.6 }); Snd.hiss({ dur:.6, vol:.025, f:800, f1:400, q:3 }); },
-  scorp()   { for (let i = 0; i < 3; i++) Snd.hiss({ dur:.03, vol:.07, type:'highpass', f:3200, delay:i * .07 }); },
-  ape()     { Snd.tone({ type:'sawtooth', f:[140, 185, 100], dur:.55, vol:.09, lp:700 }); Snd.hiss({ dur:.45, vol:.05, type:'lowpass', f:700 }); },
-  eye()     { Snd.tone({ f:150, dur:.6, vol:.05 }); Snd.tone({ f:157, dur:.6, vol:.05 }); },
-  necro()   { Snd.tone({ type:'sawtooth', f:[110, 98], dur:.75, vol:.05, lp:600, wet:.5 }); Snd.tone({ type:'sawtooth', f:[117, 104], dur:.75, vol:.04, lp:600 }); },
-  boar()    { Snd.tone({ type:'sawtooth', f:[480, 920, 420], dur:.3, vol:.05, lp:2200 }); },
-  bats()    { Snd.tone({ type:'square', f:[2300, 3100], dur:.06, vol:.02 }); Snd.tone({ type:'square', f:[2500, 3300], dur:.06, vol:.02, delay:.09 }); },
-  golem()   { Snd.hiss({ dur:.6, vol:.18, type:'lowpass', f:190 }); Snd.tone({ f:[56, 44], dur:.6, vol:.14 }); },
-  drake()   { Snd.tone({ type:'sawtooth', f:[260, 140], dur:.45, vol:.08, lp:1500 }); Snd.hiss({ dur:.4, vol:.07, f:1200, f1:500 }); },
-  lich()    { Snd.hiss({ dur:.85, vol:.06, f:2600, f1:900, q:6, wet:.6 }); },
-  demon()   { Snd.tone({ type:'sawtooth', f:[86, 62], dur:.85, vol:.12, lp:500, wet:.3 }); Snd.tone({ type:'sawtooth', f:[172, 124], dur:.85, vol:.05, lp:800 }); Snd.hiss({ dur:.7, vol:.06, type:'lowpass', f:500 }); },
+  goblin()  { Snd.tone({ type:'triangle', f:[700, 1150, 650], dur:.15, vol:.04, lp:2400 }); },
+  wolf()    { Snd.tone({ f:[420, 780, 560], dur:.6, vol:.06, vib:[6, 16], wet:.35 }); },
+  ogre()    { Snd.tone({ type:'triangle', f:[200, 150], dur:.3, vol:.07, lp:700, vib:[18, 10] }); Snd.hiss({ dur:.25, vol:.05, f:500, q:1.2 }); },
+  knight()  { Snd.tone({ f:960, dur:.2, vol:.03, wet:.2 }); Snd.tone({ f:1440, dur:.16, vol:.022, delay:.05 }); },
+  shaman()  { Snd.tone({ type:'triangle', f:[330, 345], dur:.7, vol:.035, vib:[5, 6], lp:1500, wet:.45 }); Snd.tone({ f:[495, 480], dur:.7, vol:.025, wet:.45 }); },
+  slime()   { Snd.tone({ f:[340, 160], dur:.2, vol:.07, vib:[22, 30] }); },
+  phantom() { Snd.tone({ f:[380, 290], dur:.85, vol:.04, vib:[4, 12], wet:.6 }); Snd.hiss({ dur:.6, vol:.02, f:800, f1:400, q:3 }); },
+  scorp()   { for (let i = 0; i < 3; i++) Snd.hiss({ dur:.025, vol:.05, type:'highpass', f:3500, delay:i * .07 }); },
+  ape()     { Snd.tone({ type:'triangle', f:[240, 300, 190], dur:.5, vol:.06, lp:900, vib:[22, 14] }); Snd.hiss({ dur:.4, vol:.04, f:600, q:1 }); },
+  eye()     { Snd.tone({ f:300, dur:.6, vol:.035 }); Snd.tone({ f:307, dur:.6, vol:.035 }); },
+  necro()   { Snd.tone({ type:'triangle', f:[220, 196], dur:.75, vol:.04, lp:800, wet:.5 }); Snd.tone({ f:[233, 208], dur:.75, vol:.03 }); },
+  boar()    { Snd.tone({ type:'triangle', f:[560, 980, 480], dur:.28, vol:.045, lp:2200 }); },
+  bats()    { Snd.tone({ f:[2600, 3300], dur:.05, vol:.02 }); Snd.tone({ f:[2800, 3500], dur:.05, vol:.02, delay:.08 }); },
+  golem()   { Snd.hiss({ dur:.5, vol:.1, f:300, q:.8 }); Snd.tone({ f:[150, 110], dur:.45, vol:.06 }); },
+  drake()   { Snd.tone({ type:'triangle', f:[360, 220], dur:.42, vol:.055, lp:1500, vib:[20, 12] }); Snd.hiss({ dur:.4, vol:.05, f:1200, f1:500 }); },
+  lich()    { Snd.hiss({ dur:.85, vol:.045, f:2600, f1:900, q:6, wet:.6 }); },
+  demon()   { Snd.tone({ type:'triangle', f:[200, 140], dur:.8, vol:.07, lp:700, vib:[16, 12], wet:.3 }); Snd.hiss({ dur:.7, vol:.05, f:500, q:.8 }); },
 };
-const SFX_GAP = { shoot:.035, hit:.03, kill:.05, coin:.07, block:.05, spit:.1, shotDown:.05, meteorFall:.08, boom:.06 };
+const SFX_GAP = { shoot:.04, hit:.035, kill:.05, coin:.08, block:.05, spit:.1, shotDown:.05, meteorFall:.08, boom:.07 };
 function sfx(kind) {
   if (!save.sound || !Snd.ok()) return;
   const k = kind === 'volley' ? 'shoot' : kind;
@@ -883,15 +884,15 @@ function sfx(kind) {
 }
 function voice(id, force) {
   if (!save.sound || !Snd.ok() || !VOICE[id]) return;
-  if (!Snd.throttle(force ? 'v-' + id : 'voice', force ? .6 : .45)) return;
+  if (!Snd.throttle(force ? 'v-' + id : 'voice', force ? .6 : .5)) return;
   try { VOICE[id](); } catch {}
 }
 
-/* ---------- МУЗЫКА: генеративный секвенсор (ре дорийский) — лютня, флейта, бурдон, барабаны ---------- */
+/* ---------- МУЗЫКА: генеративный секвенсор (ре дорийский) — арфа, флейта, мягкий фон, рамочный барабан в бою ---------- */
 const Music = {
   timer:null, next:0, step:0, mode:'menu', mel:7,
-  BARS:[[50, 53, 57], [48, 52, 55], [43, 47, 50], [50, 53, 57], [50, 53, 57], [48, 52, 55], [45, 48, 52], [50, 53, 57]],
-  SCALE:[62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81],
+  BARS:[[62, 65, 69], [60, 64, 67], [55, 59, 62], [62, 65, 69], [62, 65, 69], [60, 64, 67], [57, 60, 64], [62, 65, 69]],
+  SCALE:[74, 76, 77, 79, 81, 83, 84, 86, 88, 89, 91, 93],
   setMode(m) { this.mode = m; },
   start() {
     if (!Snd.ctx || this.timer) return;
@@ -900,40 +901,48 @@ const Music = {
   },
   tick() {
     const C = Snd.ctx; if (!C || C.state !== 'running' || !save.music) { if (C) this.next = Math.max(this.next, C.currentTime + .05); return; }
-    const bpm = this.mode === 'battle' ? 104 : 80, eighth = 60 / bpm / 2;
+    const bpm = this.mode === 'battle' ? 100 : 76, eighth = 60 / bpm / 2;
     if (this.next < C.currentTime) this.next = C.currentTime + .05;
     while (this.next < C.currentTime + .3) { this.play(this.step, this.next, eighth); this.next += eighth; this.step++; }
   },
   play(step, t, e) {
     const D = Snd.musBus, battle = this.mode === 'battle', s = step % 8, bar = Math.floor(step / 8) % 8, ch = this.BARS[bar];
     const at = t - Snd.ctx.currentTime;
-    // бурдон и бас
-    if (s === 0) {
-      Snd.pluck(mtof(ch[0] - 12), { vol:.32, decay:.997, bright:.35, wet:.25, dest:D, at:t });
-      Snd.tone({ type:'triangle', f:mtof(ch[0] - 12), dur:e * 8, vol:.045, at:.3, lp:500, delay:at, dest:D, wet:.3 });
-      Snd.tone({ type:'triangle', f:mtof(ch[2] - 12), dur:e * 8, vol:.025, at:.3, lp:500, delay:at, dest:D });
-    }
-    // лютня: арпеджио по аккорду
+    // мягкий фон-аккорд (пэд) раз в такт: синусы средних частот с медленной атакой
+    if (s === 0) for (const n of ch) Snd.tone({ f:mtof(n), dur:e * 8.4, vol:.022, at:e * 2, delay:at, dest:D, wet:.5 });
+    // арфа: арпеджио по аккорду
     const arp = [ch[0], ch[1], ch[2], ch[0] + 12, ch[2], ch[1], ch[0] + 12, ch[2]];
-    if (battle || Math.random() > .25) Snd.pluck(mtof(arp[s] + 12), { vol:battle ? .13 : .11, decay:.995, bright:.55, wet:.3, dest:D, at:t });
-    // флейта: случайная прогулка по ладу, на сильных долях — к звукам аккорда
-    if (s % 2 === 0 && Math.random() < (battle ? .6 : .45) && (bar % 2 === 1 || battle)) {
+    if (battle || Math.random() > .2) Snd.harp(mtof(arp[s]), { vol:battle ? .055 : .05, delay:at, dest:D, dur:1.2, wet:.35 });
+    // флейта: чистый тон с дыханием и вибрато
+    if (s % 2 === 0 && Math.random() < (battle ? .55 : .45) && (bar % 2 === 1 || battle)) {
       this.mel = Math.max(0, Math.min(this.SCALE.length - 1, this.mel + [-2, -1, -1, 1, 1, 2][Math.random() * 6 | 0]));
       let n = this.SCALE[this.mel];
       if (s === 0) { const tones = ch.map(c => c + 12).concat(ch.map(c => c + 24)); n = tones.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a); }
-      Snd.tone({ type:'triangle', f:mtof(n), dur:e * 1.9, vol:.05, at:.05, lp:2600, vib:[5, 4], delay:at, dest:D, wet:.4 });
-      Snd.tone({ f:mtof(n + 12), dur:e * 1.6, vol:.012, at:.06, delay:at, dest:D });
+      Snd.tone({ f:mtof(n), dur:e * 1.9, vol:.032, at:.06, vib:[5, 3], delay:at, dest:D, wet:.45 });
+      Snd.hiss({ dur:e * 1.2, vol:.006, f:mtof(n) * 2, q:4, at:.05, delay:at, dest:D });
     }
-    // барабаны только в бою
+    // рамочный барабан и бубен — только в бою, тихо
     if (battle) {
-      if (s === 0 || s === 4) { Snd.tone({ f:[130, 48], dur:.28, vol:.28, delay:at, dest:D }); Snd.hiss({ dur:.08, vol:.06, type:'lowpass', f:400, delay:at, dest:D }); }
-      if (s === 6) Snd.tone({ f:[180, 80], dur:.15, vol:.14, delay:at, dest:D });
-      if (s % 2 === 1) Snd.hiss({ dur:.05, vol:s === 3 || s === 7 ? .045 : .025, type:'highpass', f:7000, delay:at, dest:D });
+      if (s === 0 || s === 4) { Snd.tone({ f:[220, 150], dur:.16, vol:.07, delay:at, dest:D }); Snd.hiss({ dur:.07, vol:.04, f:500, q:.8, delay:at, dest:D }); }
+      if (s % 2 === 1) Snd.hiss({ dur:.04, vol:s === 3 || s === 7 ? .022 : .012, type:'highpass', f:8000, delay:at, dest:D });
     }
   },
 };
 function audioUnlock() { if (Snd.init()) { Music.start(); Snd.setVolumes(); } }
 document.addEventListener('pointerdown', audioUnlock, { capture:true });
+
+/* ---------- прослушивание звуков (настройки → панель тестировщика) ---------- */
+const SFX_NAMES = { shoot:'Выстрел', volley:'Залп', hit:'Попадание', block:'Броня', kill:'Гибель врага', coin:'Монета', hurt:'Удар по башне', wave:'Начало волны',
+  clear:'Волна отбита', buy:'Покупка', meteorCast:'Метеоры', boom:'Взрыв метеора', rage:'Быстрая перезарядка', frost:'Ледяная буря', defeat:'Поражение' };
+function soundBoard() {
+  openOverlay(`<h2>Звуки игры</h2><p class="muted">Нажми, чтобы прослушать. Напиши название звука, если его нужно переделать.</p>
+    <span class="label">Эффекты</span><div class="waves" id="sbS">${Object.entries(SFX_NAMES).map(([k, n]) => `<button data-s="${k}">${n}</button>`).join('')}</div>
+    <span class="label">Голоса врагов</span><div class="waves" id="sbV">${ENEMIES.map(e => `<button data-v="${e.id}">${e.name}</button>`).join('')}</div>
+    <button class="btn big" id="sbBack">Назад</button>`);
+  $('#sbS').onclick = e => { const b = e.target.closest('button[data-s]'); if (b) { audioUnlock(); try { SFX[b.dataset.s](); } catch {} } };
+  $('#sbV').onclick = e => { const b = e.target.closest('button[data-v]'); if (b) { audioUnlock(); try { VOICE[b.dataset.v](); } catch {} } };
+  on('sbBack', settings);
+}
 
 function buzz(ms) { try { if (window.AndroidBridge) AndroidBridge.vibrate(ms); else if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
 
@@ -1561,6 +1570,7 @@ function settings() {
       <span class="muted">Текущая волна (открытие врагов):</span>
       <div class="waves" id="tw">${testWaves.map(w => `<button data-w="${w}" class="${w === save.wave ? 'on' : ''}">${w}</button>`).join('')}</div>
       <div class="row2"><button class="btn ghost" id="tCoins">Монеты ×10</button><button class="btn ghost" id="tReset">${resetArm ? 'Точно сбросить?' : 'Сбросить прогресс'}</button></div>
+      <button class="btn ghost" id="tSounds">Прослушать звуки</button>
       <span class="muted">Сохранение: схема v${save.v}, память этого устройства.</span>
     </div></details>
     <button class="btn big" id="sBack">Готово</button>`);
@@ -1572,6 +1582,7 @@ function settings() {
   $('#tw').onclick = e => { const b = e.target.closest('button[data-w]'); if (!b) return; save.wave = +b.dataset.w; save.farm = false; Store.save(save); settings(); };
   on('tCoins', () => { save.coins = Math.max(1000, save.coins * 10); Store.save(save); settings(); });
   on('tReset', () => { if (!resetArm) { resetArm = true; settings(); return; } resetArm = false; save = Store.fresh(); Store.save(save); S = Progress.stats(save.ups); settings(); });
+  on('tSounds', soundBoard);
   on('sBack', () => { resetArm = false; showMenu(); });
 }
 
