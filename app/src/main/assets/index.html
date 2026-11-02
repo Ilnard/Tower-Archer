@@ -14,16 +14,18 @@
   --body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:light;
 }
-html,body{height:100%}
+html,body{height:100%;margin:0;padding:0}
 body{background:var(--ink);color:var(--ink);font-family:var(--body);overflow:hidden;overscroll-behavior:none;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-#app{position:relative;height:100%;max-width:520px;margin:0 auto;overflow:hidden;background:#7cc3e3}
+#app{position:relative;height:100%;width:100%;overflow:hidden;background:#7cc3e3}
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--z:1}
+.hud>*,.bottom .side,.farm,.hint,.card,.logo,.menu-bottom{zoom:var(--z)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 button{font-family:var(--body);font-weight:900;cursor:pointer;border:0;color:var(--ink)}
 [hidden]{display:none!important}
 button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 
-.hud{position:absolute;top:10px;left:0;right:0;display:flex;gap:8px;align-items:center;pointer-events:none;
+.hud{position:absolute;top:calc(10px + var(--sat));left:0;right:0;display:flex;gap:8px;align-items:center;pointer-events:none;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .pill{background:rgba(31,42,68,.86);color:#fff6df;border:2px solid var(--gold);border-radius:999px;padding:6px 12px;
   font-weight:900;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -34,12 +36,12 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .hpnum{color:#fff;font-weight:900;font-size:13px;text-shadow:0 1px 2px #0008;font-variant-numeric:tabular-nums}
 .iconbtn{pointer-events:auto;width:40px;height:40px;border-radius:50%;background:var(--gold);box-shadow:0 3px 0 var(--gold-d);font-size:17px;flex:none;display:grid;place-items:center;padding:0}
 .hud{gap:6px}
-.farm{position:absolute;top:60px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(31,42,68,.88);color:#fff6df;border:2px solid #9dff9a;border-radius:999px;padding:4px 4px 4px 14px;font-weight:900;font-size:14px;white-space:nowrap}
+.farm{position:absolute;top:calc(60px * var(--z) + var(--sat));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(31,42,68,.88);color:#fff6df;border:2px solid #9dff9a;border-radius:999px;padding:4px 4px 4px 14px;font-weight:900;font-size:14px;white-space:nowrap}
 .farm button{background:#9dff9a;border-radius:999px;padding:6px 12px;font-size:14px}
 #fade{position:absolute;inset:0;background:#0d1224;opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
 #fade.on{opacity:1}
 .menu-ui{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;align-items:center;z-index:3;
-  padding:max(28px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) 22px max(20px,env(safe-area-inset-left,0px));pointer-events:none}
+  padding:calc(20px + var(--sat)) max(20px,env(safe-area-inset-right,0px)) calc(22px + var(--sab)) max(20px,env(safe-area-inset-left,0px));pointer-events:none}
 .menu-ui button{pointer-events:auto}
 .logo{display:flex;flex-direction:column;align-items:center;line-height:.95;animation:float 4s ease-in-out infinite;margin-top:4vh}
 .logo span{font-family:var(--display);text-transform:uppercase;letter-spacing:.03em;color:#ffd978;
@@ -67,7 +69,7 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .tgl.on i::after{transform:translateX(20px)}
 .camp-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
 
-.bottom{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:space-between;pointer-events:none;
+.bottom{position:absolute;left:0;right:0;bottom:calc(12px + var(--sab));display:flex;justify-content:space-between;pointer-events:none;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .side{display:flex;gap:8px}
 .skill{pointer-events:auto;position:relative;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;padding:0;overflow:hidden;
@@ -86,12 +88,12 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .buymode button.on{background:var(--ink);color:var(--parch)}
 .chip{pointer-events:auto;background:var(--parch);border:3px solid var(--wood);border-radius:14px;padding:9px 16px;font-size:15px;box-shadow:0 3px 0 var(--wood-d)}
 
-.hint{position:absolute;left:0;right:0;top:108px;text-align:center;color:var(--ink);font-weight:900;font-size:15px;
+.hint{position:absolute;left:0;right:0;top:calc(108px * var(--z) + var(--sat));text-align:center;color:var(--ink);font-weight:900;font-size:15px;
   text-shadow:0 1px 0 #fff9;pointer-events:none;padding:0 24px;text-wrap:balance}
 
 .overlay{position:absolute;inset:0;background:rgba(20,28,48,.72);display:flex;align-items:center;justify-content:center;
   padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));z-index:5}
-.card{width:100%;max-height:100%;overflow:auto;background:var(--parch);border:4px solid var(--wood);border-radius:20px;
+.card{width:100%;max-width:460px;max-height:calc(100% / var(--z));overflow:auto;background:var(--parch);border:4px solid var(--wood);border-radius:20px;
   padding:18px;box-shadow:0 6px 0 var(--wood-d),0 20px 40px #0006;display:flex;flex-direction:column;gap:12px}
 .card h1,.card h2{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.1}
 .card h1{font-size:30px;color:var(--wood-d)}
@@ -417,7 +419,7 @@ const WaveGen = {
    ===================================================================== */
 const $ = s => document.querySelector(s);
 const cvs = $('#game'), ctx = cvs.getContext('2d'), app = $('#app');
-let W = 0, H = 0, DPR = 1, bg = null;
+let W = 0, H = 0, DPR = 1, K = 1, bg = null;   // W×H — логические единицы; K — масштаб экрана; DPR — пикселей на единицу
 const L = {};
 let save = Store.load();
 let S = Progress.stats(save.ups);
@@ -430,8 +432,13 @@ function layout() {
 }
 function resize() {
   const r = app.getBoundingClientRect();
-  W = r.width; H = r.height; DPR = Math.min(2, window.devicePixelRatio || 1);
-  cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
+  // Поле подгоняется под любой экран: высота ~860 единиц, ширина — по пропорциям (планшеты шире)
+  K = Math.max(.6, Math.min(2.4, Math.min(r.width / 420, r.height / 860)));
+  let dpr = Math.min(2.5, window.devicePixelRatio || 1);
+  while (r.width * r.height * dpr * dpr > 3.2e6 && dpr > 1) dpr -= .25;   // ограничение памяти на планшетах
+  W = r.width / K; H = r.height / K; DPR = dpr * K;
+  cvs.width = Math.round(r.width * dpr); cvs.height = Math.round(r.height * dpr);
+  document.documentElement.style.setProperty('--z', Math.max(.85, Math.min(1.6, K)).toFixed(3));
   layout(); spriteCache.clear(); buildBg(); measureCoinTarget();
 }
 
@@ -788,7 +795,9 @@ const Snd = {
       const hp = C.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 70;
       const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9000;
       this.master = C.createGain(); this.master.gain.value = .85; this.master.connect(hp); hp.connect(lp); lp.connect(comp);
-      this.sfxBus = C.createGain(); this.sfxBus.connect(this.master);
+      // эффекты: мягкий срез верхов, чтобы ничего не резало слух
+      const slp = C.createBiquadFilter(); slp.type = 'lowpass'; slp.frequency.value = 5500; slp.Q.value = .5;
+      this.sfxBus = C.createGain(); this.sfxBus.connect(slp); slp.connect(this.master);
       // у музыки дополнительно убираем низ ниже 140 Гц — никакого гудящего баса
       const mhp = C.createBiquadFilter(); mhp.type = 'highpass'; mhp.frequency.value = 140; mhp.Q.value = .5;
       this.musBus = C.createGain(); this.musBus.connect(mhp); mhp.connect(this.master);
@@ -802,7 +811,7 @@ const Snd = {
   },
   setVolumes(now) {
     if (!this.ctx) return; const t = this.ctx.currentTime, quiet = state === 'paused' || state === 'over';
-    const s = save.sound ? .75 : 0, m = save.music ? (quiet ? .14 : .34) : 0;
+    const s = save.sound ? .6 : 0, m = save.music ? (quiet ? .14 : .36) : 0;
     if (now) { this.sfxBus.gain.value = s; this.musBus.gain.value = m; }
     else { this.sfxBus.gain.setTargetAtTime(s, t, .05); this.musBus.gain.setTargetAtTime(m, t, .4); }
   },
@@ -833,19 +842,18 @@ const Snd = {
 const mtof = m => 440 * 2 ** ((m - 69) / 12);
 
 const SFX = {
-  // лук: щелчок тетивы + свист стрелы, без низких частот
-  shoot() { Snd.hiss({ dur:.016, vol:.28, type:'highpass', f:4200 }); Snd.tone({ type:'triangle', f:[440, 250], dur:.08, vol:.2, lp:1800 }); Snd.hiss({ dur:.22, vol:.24, f:2200, f1:650, q:1.3, delay:.01 }); },
-  volley() { Snd.hiss({ dur:.014, vol:.14, type:'highpass', f:4500 }); Snd.tone({ type:'triangle', f:[440, 260], dur:.08, vol:.08, lp:1800 });
-    for (let i = 0; i < 5; i++) Snd.hiss({ dur:.22, vol:.05, f:2600 - i * 250, f1:700, q:1.6, delay:.01 + i * .025 }); Snd.harp(1175, { vol:.035, delay:.03, dur:.5 }); },
-  hit() { Snd.hiss({ dur:.06, vol:.13, f:1500, q:.9 }); Snd.tone({ f:[260, 140], dur:.07, vol:.08 }); },
-  block() { for (const [f, v] of [[1250, .045], [1870, .035], [2740, .025]]) Snd.tone({ f, dur:.35, vol:v, wet:.3 }); Snd.hiss({ dur:.03, vol:.07, type:'highpass', f:4000 }); },
-  kill() { Snd.tone({ f:[520, 980], dur:.09, vol:.06 }); Snd.hiss({ dur:.18, vol:.05, f:900, f1:300, q:.7 }); },
-  coin() { Snd.tone({ f:1568, dur:.09, vol:.04 }); Snd.tone({ f:2093, dur:.2, vol:.04, delay:.06, wet:.25 }); },
+  // лук: мягкое «фьють» — приглушённый свист стрелы и тихий отзвук тетивы, высота слегка случайна
+  shoot() { const r = .9 + Math.random() * .2; Snd.hiss({ dur:.13, vol:.045, f:1150 * r, f1:480 * r, q:.9, at:.012 }); Snd.tone({ f:[300 * r, 230 * r], dur:.06, vol:.018, at:.004 }); },
+  volley() { for (let i = 0; i < 3; i++) { const r = .9 + Math.random() * .2; Snd.hiss({ dur:.16, vol:.035, f:1300 * r, f1:500 * r, q:1, at:.012, delay:i * .035 }); } Snd.harp(1175, { vol:.022, delay:.04, dur:.5 }); },
+  hit() { const r = .9 + Math.random() * .2; Snd.hiss({ dur:.06, vol:.05, f:900 * r, q:.8, at:.006 }); Snd.tone({ f:[220 * r, 130 * r], dur:.07, vol:.04 }); },
+  block() { for (const [f, v] of [[1250, .025], [1870, .018], [2740, .012]]) Snd.tone({ f, dur:.3, vol:v, at:.004, wet:.3 }); },
+  kill() { Snd.tone({ f:[440, 760], dur:.08, vol:.03, at:.006 }); Snd.hiss({ dur:.2, vol:.03, f:700, f1:250, q:.7, at:.01 }); },
+  coin() { Snd.tone({ f:1568, dur:.08, vol:.022 }); Snd.tone({ f:2093, dur:.18, vol:.02, delay:.06, wet:.3 }); },
   hurt() { Snd.tone({ f:[180, 90], dur:.22, vol:.16 }); Snd.hiss({ dur:.22, vol:.14, f:700, f1:250, q:.8 }); Snd.hiss({ dur:.04, vol:.08, f:2400, q:1.2 }); },
   wave() { [587, 740, 880].forEach((f, i) => Snd.tone({ type:'triangle', f, dur:.55 - i * .08, vol:.045, at:.03, lp:2000, delay:i * .12, wet:.4 })); },
   clear() { [784, 988, 1175, 1568].forEach((f, i) => Snd.harp(f, { vol:.06, delay:i * .07, dur:.9 })); },
   buy() { [1047, 1319, 1568].forEach((f, i) => Snd.tone({ f, dur:.14, vol:.045, delay:i * .05, wet:.2 })); },
-  click() { Snd.tone({ f:[900, 1100], dur:.04, vol:.035 }); },
+  click() { Snd.tone({ f:[700, 820], dur:.04, vol:.025, at:.004 }); },
   spit() { Snd.hiss({ dur:.13, vol:.07, f:1500, f1:500, q:2 }); },
   shotDown() { Snd.tone({ f:[1400, 700], dur:.07, vol:.035 }); },
   meteorCast() { Snd.hiss({ dur:.8, vol:.1, f:300, f1:2400, q:2.5, wet:.3 }); Snd.harp(440, { vol:.05, dur:.8 }); Snd.harp(659, { vol:.04, dur:.8, delay:.08 }); },
@@ -1014,7 +1022,7 @@ function smoke(x, y, n = 6, color = '235,228,215') {
 }
 function ring(x, y, color, r0, r1, life = .35, w = 3) { addFx({ k:'ring', x, y, r0, r1, life, max:life, color, w }); }
 let coinTarget = { x:120, y:30 };
-function measureCoinTarget() { try { const r = $('#hCoins').getBoundingClientRect(), a = app.getBoundingClientRect(); if (r.width) coinTarget = { x:r.left - a.left + 16, y:r.top - a.top + r.height / 2 }; } catch {} }
+function measureCoinTarget() { try { const r = $('#hCoins').getBoundingClientRect(), a = app.getBoundingClientRect(); if (r.width) coinTarget = { x:(r.left - a.left + 16) / K, y:(r.top - a.top + r.height / 2) / K }; } catch {} }
 function coinFly(x, y, n) { for (let i = 0; i < Math.min(n, 4); i++) addFx({ k:'coin', x0:x + (Math.random() - .5) * 16, y0:y, x, y, life:.75 + i * .07, max:.75 + i * .07, lift:60 + Math.random() * 40 }); }
 function damage(e, d, crit) {
   if (e.dead) return;
@@ -1442,7 +1450,7 @@ function frame(t) {
 }
 
 /* ---------- ввод (один палец) ---------- */
-function pt(e) { const r = cvs.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; }
+function pt(e) { const r = cvs.getBoundingClientRect(); return { x:(e.clientX - r.left) / K, y:(e.clientY - r.top) / K }; }
 cvs.addEventListener('pointerdown', e => {
   if (state !== 'play') return; drag = pt(e); try { cvs.setPointerCapture(e.pointerId); } catch {}
 });

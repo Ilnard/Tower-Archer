@@ -4,16 +4,33 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.DisplayCutout;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.util.Locale;
+
 /** Полноэкранная обёртка над HTML5-игрой из assets/index.html. */
 public class MainActivity extends Activity {
 
     private WebView web;
+    private WindowInsets lastInsets;
+
+    /** Передаёт в CSS безопасные отступы выреза камеры (--sat/--sab), чтобы интерфейс не прятался под ним. */
+    private void pushInsets() {
+        if (web == null) return;
+        float top = 0, bottom = 0, d = getResources().getDisplayMetrics().density;
+        if (Build.VERSION.SDK_INT >= 28 && lastInsets != null) {
+            DisplayCutout c = lastInsets.getDisplayCutout();
+            if (c != null) { top = c.getSafeInsetTop() / d; bottom = c.getSafeInsetBottom() / d; }
+        }
+        web.evaluateJavascript(String.format(Locale.US,
+                "document.documentElement.style.setProperty('--sat','%.1fpx');document.documentElement.style.setProperty('--sab','%.1fpx');", top, bottom), null);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +51,10 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setTextZoom(100);                    // системный масштаб шрифта не ломает вёрстку
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) { view.requestApplyInsets(); pushInsets(); }
+        });
+        web.setOnApplyWindowInsetsListener((v, insets) -> { lastInsets = insets; pushInsets(); return v.onApplyWindowInsets(insets); });
         web.addJavascriptInterface(new GameBridge(this), "AndroidBridge");
         WebView.setWebContentsDebuggingEnabled(BuildConfigHolder.DEBUG);
 
