@@ -11,6 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
+        android:appCategory="game"
+        android:isGame="true"
         android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
 
         <!-- SDK рекламы запускается только после выбора согласия игроком -->
