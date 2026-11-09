@@ -1,28 +1,33 @@
 package com.ilnard.towerarcher;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.webkit.JavascriptInterface;
 
-/**
- * Мост JS → Android. Сюда же позже добавится реклама:
- * showRewarded(placement) → Yandex Mobile Ads RewardedAd → колбэк в JS.
- */
+/** Мост JS → Android: вибрация, версия, флаги сборки и реклама. */
 public class GameBridge {
-    private final Context ctx;
+    private final Activity activity;
+    private final AdsManager ads;
 
-    GameBridge(Context ctx) { this.ctx = ctx.getApplicationContext(); }
+    GameBridge(Activity activity, AdsManager ads) { this.activity = activity; this.ads = ads; }
 
     @JavascriptInterface
     public void vibrate(long ms) {
-        Vibrator v = (Vibrator) ctx.getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator v = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
         if (v == null || !v.hasVibrator()) return;
-        if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE));
-        else v.vibrate(ms);
+        if (Build.VERSION.SDK_INT >= 26) v.vibrate(VibrationEffect.createOneShot(Math.min(ms, 300), VibrationEffect.DEFAULT_AMPLITUDE));
+        else v.vibrate(Math.min(ms, 300));
     }
 
-    @JavascriptInterface
-    public boolean isAndroid() { return true; }
+    @JavascriptInterface public boolean isAndroid() { return true; }
+    @JavascriptInterface public String version() { return BuildConfig.VERSION_NAME; }
+    @JavascriptInterface public boolean isTesterBuild() { return BuildConfig.TESTER_TOOLS; }
+    @JavascriptInterface public boolean isDemoAds() { return BuildConfig.REWARDED_AD_UNIT.startsWith("demo-"); }
+
+    @JavascriptInterface public void initAds(boolean personalized) { activity.runOnUiThread(() -> ads.init(personalized)); }
+    @JavascriptInterface public boolean isRewardedReady() { return ads.isReady(); }
+    @JavascriptInterface public void showRewarded(String placement) { activity.runOnUiThread(() -> ads.show(placement)); }
 }

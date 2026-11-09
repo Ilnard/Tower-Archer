@@ -1,28 +1,11 @@
 # Башенный лучник
 
-Мобильная игра-прототип: защита башни свайпом. HTML5-игра в полноэкранной Android-обёртке (WebView).
+Мобильная игра «защита башни» для Android: HTML5-игра в нативной обёртке (WebView) с рекламой Yandex Mobile Ads.
 
-## Как получить APK
-Каждый push в `main` запускает GitHub Actions (вкладка **Actions**). Через 3–5 минут на странице
-**Releases** появляется сборка `TowerArcher-0.2.N.apk` — откройте её с телефона, скачайте и установите
-(Android попросит разрешить установку из этого источника).
+**Релиз, сборки, что сделать перед публикацией — см. [RELEASE.md](RELEASE.md).**
 
-Все сборки подписаны одним тестовым ключом (`app/test.keystore`), поэтому новая версия ставится поверх старой
-с сохранением прогресса. Для Google Play будет отдельный секретный ключ и AAB.
-
-## Структура
-- `app/src/main/assets/index.html` — вся игра (баланс, волны, улучшения, сохранение, адаптер рекламы)
-- `app/src/main/java/.../MainActivity.java` — полноэкранный WebView, портрет, пауза при сворачивании, кнопка «Назад»
-- `app/src/main/java/.../GameBridge.java` — мост JS → Android (вибрация; позже реклама Yandex Mobile Ads)
-- `.github/workflows/build-apk.yml` — сборка APK в облаке
-
-## Локальная сборка (необязательно)
-Открыть папку в Android Studio → Build → Build APK(s).
-
-## Отладка на телефоне
-Подключите телефон по USB с включённой отладкой и откройте в Chrome на компьютере `chrome://inspect`.
-
-## Баланс
-- `tools/economy_model.py` — модель экономики: фазы роста HP врагов и наград, время до волн 100/200/300/500.
-- `tools/balance_bot.js` — бот для Playwright: играет в настоящую игру с автоприцелом и оптимальной прокачкой
-  и записывает, за сколько игрового времени достигнута каждая волна. Запуск: `node tools/balance_bot.js <папка с t.html> <часы>`.
+- Игра: `app/src/main/assets/index.html` (единственный источник; веб-версия собирается `tools/build_web.py`)
+- Android: `app/src/main/java/com/ilnard/towerarcher/` — `MainActivity` (WebView), `GameBridge` (мост JS↔Android), `AdsManager` (реклама)
+- Баланс: `tools/economy_model.py`, `tools/balance_bot.js`
+- Графика магазина: `tools/store_shots.js`, `tools/store_icon.py`
+- Сайт и политика конфиденциальности: `docs/` (GitHub Pages)

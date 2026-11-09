@@ -3,8 +3,7 @@
 <title>Башенный лучник</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#1f2a44">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@600;800;900&display=swap">
+<style id="fonts">@font-face{font-family:'Russo One';src:url('fonts/RussoOne-Regular.ttf') format('truetype');font-display:swap}@font-face{font-family:'Nunito';src:url('fonts/Nunito.ttf') format('truetype');font-weight:200 1000;font-display:swap}</style>
 <style>
 /* Layout: one portrait play-field canvas, HUD floating over the sky, parchment cards for menus. Single cartoon look by choice. */
 :root{
@@ -50,8 +49,8 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .logo .l2{font-size:clamp(46px,16vw,72px)}
 @keyframes float{50%{transform:translateY(-6px)}}
 .menu-bottom{width:100%;max-width:360px;display:flex;flex-direction:column;gap:10px;align-items:stretch}
-.menu-stats{display:flex;justify-content:center;gap:10px;color:#fff6df;font-weight:900;font-size:15px}
-.menu-stats span{background:rgba(20,24,48,.6);border-radius:999px;padding:5px 12px;font-variant-numeric:tabular-nums}
+.menu-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;color:#fff6df;font-weight:900;font-size:13px}
+.menu-stats span{background:rgba(20,24,48,.6);border-radius:999px;padding:5px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .play{display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(#ffe08a,#f0a93a);border:4px solid #5e3b1f;border-radius:22px;padding:14px;
   box-shadow:0 6px 0 #5e3b1f,0 14px 30px rgba(0,0,0,.4);color:#4a2210}
 .play span{font-family:var(--display);font-size:32px;text-transform:uppercase;letter-spacing:.04em;line-height:1}
@@ -125,12 +124,17 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .up .d{font-size:13px;color:var(--mute);line-height:1.35;margin-top:2px}
 .up .btn{min-width:78px;padding:9px 10px;font-size:15px;line-height:1.15;font-variant-numeric:tabular-nums}
 .enemy-card{display:flex;gap:14px;align-items:center}
+.enemy-card .big.tut{display:grid;place-items:center;background:radial-gradient(#fff8e4,#ecd8a8)}
+.linkbtn{display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);font-weight:900}
 .enemy-card .big.boss{background:radial-gradient(#5a3a7c,#1d1230);border-color:#3e1a6e}
 .enemy-card .big{width:84px;height:84px;flex:none;background:radial-gradient(#fff8e4,#ecd8a8);border-radius:18px;border:3px solid var(--wood)}
 .coin{display:inline-block;width:.95em;height:.95em;border-radius:50%;vertical-align:-.12em;margin-right:.3em;background:radial-gradient(circle at 35% 30%,#fff3a8,#f3c35f 45%,#c27f1c);box-shadow:inset 0 0 0 1.5px #8a5a14}
 details{background:var(--parch-2);border-radius:12px;padding:8px 12px}
 details summary{font-weight:900;cursor:pointer}
 details .stack{margin-top:8px}
+#toast{position:absolute;left:50%;bottom:calc(84px + var(--sab));transform:translateX(-50%);z-index:12;background:rgba(20,26,46,.94);color:#fff6df;border:2px solid var(--gold);border-radius:14px;padding:10px 16px;font-weight:800;font-size:14px;max-width:86%;text-align:center}
+.spin{width:42px;height:42px;border-radius:50%;border:4px solid rgba(255,255,255,.2);border-top-color:#f3c35f;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 #ad{position:absolute;inset:0;z-index:9;background:#10141f;color:#e8ecf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
 #ad .t{font-family:var(--display);font-size:26px}
 #ad .n{font-size:64px;font-family:var(--display)}
@@ -154,13 +158,14 @@ details .stack{margin-top:8px}
       <div class="menu-stats" id="mStats"></div>
       <button class="play" id="mPlay"><span>Играть</span><small id="mWave">Волна 1</small></button>
       <div class="menu-row"><button class="mbtn" id="mCamp"><i id="mCampIco"></i><span>Лагерь</span></button><button class="mbtn" id="mSettings"><i><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm8.5 3.5l2-1.6-2-3.4-2.4.8a7 7 0 0 0-1.9-1.1L15.7 4h-3.9l-.5 2.7a7 7 0 0 0-1.9 1.1l-2.4-.8-2 3.4 2 1.6a7 7 0 0 0 0 2.2l-2 1.6 2 3.4 2.4-.8a7 7 0 0 0 1.9 1.1l.5 2.7h3.9l.5-2.7a7 7 0 0 0 1.9-1.1l2.4.8 2-3.4-2-1.6a7 7 0 0 0 0-2.2z" fill="#5e3b1f"/></svg></i><span>Настройки</span></button></div>
-      <div class="ver">Прототип · сборка 0.5</div>
+      <div class="ver" id="mVer"></div>
     </div>
   </div>
   <div class="hint" id="hint" hidden>Коснись поля и веди палец к цели. Отпусти — выстрел.</div>
   <div class="bottom" id="bottom" hidden><div class="side"><button class="skill" id="sk-meteor" aria-label="Метеоритный дождь"><svg viewBox="0 0 32 32" width="26" height="26"><path d="M4 4l12 9M8 2l10 9M2 9l11 7" stroke="#ffb04a" stroke-width="3" stroke-linecap="round"/><circle cx="21" cy="20" r="8" fill="#ff7a2e" stroke="#2b1d2c" stroke-width="2"/><circle cx="18.5" cy="17.5" r="2.5" fill="#ffd25a"/></svg><span class="cdn"></span></button><button class="skill" id="sk-rage" aria-label="Быстрая перезарядка"><svg viewBox="0 0 32 32" width="26" height="26"><path d="M18 2L6 18h8l-3 12 13-17h-8z" fill="#ffd24a" stroke="#2b1d2c" stroke-width="2" stroke-linejoin="round"/></svg><span class="cdn"></span></button></div><div class="side"><button class="skill" id="sk-frost" aria-label="Ледяная буря"><svg viewBox="0 0 32 32" width="26" height="26"><g stroke="#e6f7ff" stroke-width="3" stroke-linecap="round"><path d="M16 3v26M4.7 9.5l22.6 13M4.7 22.5l22.6-13"/><path d="M12 5l4 3 4-3M12 27l4-3 4 3" fill="none"/></g><circle cx="16" cy="16" r="3" fill="#8fe3ff"/></svg><span class="cdn"></span></button><button class="skill camp" id="bCamp" aria-label="Лагерь">⚒</button></div></div>
   <div class="overlay" id="ov"><div class="card" id="card"></div></div>
   <div id="ad" hidden></div>
+  <div id="toast" role="status" hidden></div>
   <div id="fade"></div>
 </div>
 
@@ -316,7 +321,7 @@ const Progress = {
 /* ---------- СОХРАНЕНИЕ с версией схемы ---------- */
 const Store = {
   KEY: 'tower-archer-save', SCHEMA: 3,
-  fresh() { return { v:3, coins:0, best:0, wave:1, farm:false, sound:true, music:true, fx:'high', theme:'classic', ups:Object.fromEntries(ALL_UPS.map(u => [u.id, 0])) }; },
+  fresh() { return { v:3, coins:0, best:0, wave:1, farm:false, sound:true, music:true, fx:'high', theme:'classic', vibro:true, consent:null, tutorialDone:false, ups:Object.fromEntries(ALL_UPS.map(u => [u.id, 0])) }; },
   migrate(d) {
     const f = this.fresh();
     if (!d || typeof d !== 'object') return f;
@@ -330,11 +335,15 @@ const Store = {
     }
     if ((d.v || 1) < 3) { d.wave = Math.max(1, d.best || 1); d.farm = false; d.music = true; }   // v2 → v3: продолжение с текущей волны
     const out = { ...f, ...d, ups:{ ...f.ups }, v:this.SCHEMA };
+    if (d.tutorialDone === undefined) out.tutorialDone = (d.best || 0) > 5;   // опытным игрокам обучение не показываем
     for (const k in f.ups) if (Number.isFinite(ups[k])) out.ups[k] = ups[k];
     return out;
   },
-  load() { try { return this.migrate(JSON.parse(localStorage.getItem(this.KEY))); } catch { return this.fresh(); } },
-  save(d) { try { localStorage.setItem(this.KEY, JSON.stringify(d)); } catch {} },
+  load() {
+    for (const k of [this.KEY, this.KEY + '-bak']) { try { const raw = localStorage.getItem(k); if (!raw) continue; const d = JSON.parse(raw); if (d && typeof d === 'object' && d.ups) return this.migrate(d); } catch {} }
+    return this.fresh();
+  },
+  save(d) { try { d.appVersion = APP_VERSION; const raw = JSON.stringify(d); localStorage.setItem(this.KEY, raw); localStorage.setItem(this.KEY + '-bak', raw); } catch {} },
 };
 
 /* ---------- формат больших чисел: 1.2K, 3.4M, 5.6B, 7.8T, 9.1aa … ---------- */
@@ -376,19 +385,54 @@ function icon(id, size = 40) {
 }
 
 /* ---------- РЕКЛАМА: адаптер (заглушка). В Android — Yandex Mobile Ads, rewarded ---------- */
+const Native = window.AndroidBridge || null;
+const nb = (fn, dflt) => { try { return Native && Native[fn] ? Native[fn]() : dflt; } catch { return dflt; } };
+const APP_VERSION = nb('version', 'веб');
+const TESTER = Native ? nb('isTesterBuild', false) : !/github\.io$/.test(location.hostname);
+const PRIVACY_URL = 'https://ilnard.github.io/Tower-Archer/privacy.html';
 const Ads = {
-  isRewardedReady() { return true; },
+  pending:null, shown:false, timer:0,
+  native:!!(Native && Native.showRewarded),
+  isRewardedReady() { return this.native ? nb('isRewardedReady', false) : true; },
+  init(personalized) { try { Native && Native.initAds && Native.initAds(!!personalized); } catch {} },
+  // Награда выдаётся только после подтверждённого просмотра (событие rewarded от SDK)
   showRewarded(placement) {
+    if (this.pending) return Promise.resolve(false);
+    if (!this.native) return this.demo(placement);
+    return new Promise(res => {
+      this.pending = { placement, res }; this.shown = false; adWait(true);
+      try { Native.showRewarded(placement); } catch { this.finish(false, 'failed'); }
+      clearTimeout(this.timer); this.timer = setTimeout(() => { if (this.pending && !this.shown) this.finish(false, 'failed'); }, 15000);
+    });
+  },
+  onEvent(p, ev) {
+    if (ev === 'ready') { if (state === 'over' && run) defeat(true); return; }
+    if (!this.pending) return;
+    if (ev === 'shown') { this.shown = true; try { Snd.ctx && Snd.ctx.suspend(); } catch {} }
+    else if (ev === 'rewarded') this.finish(true);
+    else if (ev === 'dismissed' || ev === 'failed' || ev === 'unavailable') this.finish(false, ev);
+  },
+  finish(ok, why) {
+    const p = this.pending; this.pending = null; this.shown = false; clearTimeout(this.timer); adWait(false);
+    try { Snd.ctx && !document.hidden && Snd.ctx.resume(); } catch {}
+    if (!ok) toast(why === 'dismissed' ? 'Награда выдаётся только за полный просмотр' : 'Реклама сейчас недоступна. Попробуйте чуть позже.');
+    p && p.res(ok);
+  },
+  // веб-версия: демонстрационный ролик вместо рекламы
+  demo(placement) {
     return new Promise(resolve => {
       const el = $('#ad'); let n = 3;
-      const paint = () => el.innerHTML = `<div class="label" style="color:#9aa4bd">Тестовый блок · ${placement}</div>
-        <div class="t">Здесь будет реклама с вознаграждением</div><div class="n">${n}</div>
-        <div class="muted" style="color:#9aa4bd">Заглушка SDK. Награда выдаётся после досмотра.</div>`;
+      const paint = () => el.innerHTML = `<div class="label" style="color:#9aa4bd">Демо-реклама · веб-версия</div>
+        <div class="t">В приложении здесь будет реклама с вознаграждением</div><div class="n">${n}</div>`;
       el.hidden = false; paint();
       const iv = setInterval(() => { n--; if (n <= 0) { clearInterval(iv); el.hidden = true; resolve(true); } else paint(); }, 1000);
     });
   },
 };
+window.__onAdEvent = (p, ev) => Ads.onEvent(p, ev);
+function adWait(on) { const el = $('#ad'); if (on) { el.innerHTML = '<div class="spin"></div><div class="t">Загрузка рекламы…</div>'; el.hidden = false; } else el.hidden = true; }
+let toastT = 0;
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2600); }
 
 /* ---------- ГЕНЕРАТОР ВОЛН ---------- */
 const WaveGen = {
@@ -1179,7 +1223,7 @@ function soundBoard() {
   on('sbBack', settings);
 }
 
-function buzz(ms) { try { if (window.AndroidBridge) AndroidBridge.vibrate(ms); else if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
+function buzz(ms) { if (save.vibro === false) return; try { if (Native && Native.vibrate) Native.vibrate(ms); else if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
 
 /* ---------- забег ---------- */
 function newRun(startWave) {
@@ -1918,17 +1962,21 @@ function frame(t) {
 
 /* ---------- ввод (один палец) ---------- */
 function pt(e) { const r = cvs.getBoundingClientRect(); return { x:(e.clientX - r.left) / K, y:(e.clientY - r.top) / K }; }
+let dragId = null;
 cvs.addEventListener('pointerdown', e => {
-  if (state !== 'play') return; drag = pt(e); try { cvs.setPointerCapture(e.pointerId); } catch {}
+  if (state !== 'play' || dragId !== null) return;   // второй палец игнорируется
+  dragId = e.pointerId; drag = pt(e); try { cvs.setPointerCapture(e.pointerId); } catch {}
 });
-cvs.addEventListener('pointermove', e => { if (drag) drag = pt(e); });
+cvs.addEventListener('pointermove', e => { if (drag && e.pointerId === dragId) drag = pt(e); });
 cvs.addEventListener('pointerup', e => {
+  if (e.pointerId !== dragId) return; dragId = null;
   if (!drag) return; const p = pt(e); drag = null; if (state !== 'play') return;
   const a = archerPos(); if (Math.hypot(p.x - a.x, p.y - a.y) < 20) return;
   const ang = aimAngle(p.x, p.y);
   if (run.cd <= 0) fire(ang); else run.pending = ang;
 });
-cvs.addEventListener('pointercancel', () => drag = null);
+cvs.addEventListener('pointercancel', e => { if (e.pointerId === dragId) { dragId = null; drag = null; } });
+cvs.addEventListener('lostpointercapture', e => { if (e.pointerId === dragId) { dragId = null; drag = null; } });
 
 /* =====================================================================
    ГЛАВНОЕ МЕНЮ: отдельная сцена (свой фон), не игровое поле
@@ -2032,7 +2080,9 @@ function showMenu() {
   state = 'menu'; run = null; drag = null; showGameUI(false); closeOverlay();
   $('#menuUI').hidden = false;
   $('#mWave').textContent = save.farm ? `Повтор волны ${save.wave}` : `Волна ${save.wave}`;
-  $('#mStats').innerHTML = `<span><i class="coin"></i>${fmt(save.coins)}</span><span>Рекорд: ${save.best}</span>`;
+  const nb2 = Math.ceil((save.wave + (save.wave % 20 === 0 ? 0 : 0)) / 20) * 20;
+  $('#mStats').innerHTML = `<span><i class="coin"></i>${fmt(save.coins)}</span><span>Рекорд: ${save.best}</span><span>Босс: волна ${nb2}</span>`;
+  $('#mVer').textContent = 'Версия ' + APP_VERSION;
   Music.setMode('menu'); Snd.setVolumes();
 }
 function startGame() { $('#menuUI').hidden = true; hintShown = save.best < 2; newRun(save.wave); Music.setMode('battle'); }
@@ -2040,25 +2090,58 @@ const toggle = (id, label, onv) => `<button class="tgl ${onv ? 'on' : ''}" id="$
 function settings() {
   const testWaves = [1, 10, 20, 40, 60, 80, 100, 150, 200, 301, 400, 501, 750, 1001];
   openOverlay(`<h2>Настройки</h2>
-    <div class="stack">${toggle('sSound', 'Звуки', save.sound)}${toggle('sMusic', 'Музыка', save.music)}${toggle('sFx', 'Полные эффекты', save.fx !== 'low')}</div>
-    <details id="test" ${testOpen ? 'open' : ''}><summary>Панель тестировщика</summary><div class="stack">
+    <div class="stack">${toggle('sSound', 'Звуки', save.sound)}${toggle('sMusic', 'Музыка', save.music)}${toggle('sVibro', 'Вибрация', save.vibro !== false)}${toggle('sFx', 'Полные эффекты', save.fx !== 'low')}${toggle('sAds', 'Персонализированная реклама', save.consent === 'personal')}</div>
+    <div class="row2"><button class="btn ghost" id="sHelp">Как играть</button><a class="btn ghost linkbtn" href="${PRIVACY_URL}" target="_blank" rel="noopener">Конфиденциальность</a></div>
+    ${TESTER ? `<details id="test" ${testOpen ? 'open' : ''}><summary>Панель тестировщика</summary><div class="stack">
       <span class="muted">Текущая волна (20/40/60/80/100 — боссы; 301, 501, 1001 — новые облики):</span>
       <div class="waves" id="tw">${testWaves.map(w => `<button data-w="${w}" class="${w === save.wave ? 'on' : ''}">${w}</button>`).join('')}</div>
       <div class="row2"><button class="btn ghost" id="tCoins">Монеты ×10</button><button class="btn ghost" id="tReset">${resetArm ? 'Точно сбросить?' : 'Сбросить прогресс'}</button></div>
       <button class="btn ghost" id="tSounds">Прослушать звуки</button>
-      <span class="muted">Сохранение: схема v${save.v}, память этого устройства.</span>
-    </div></details>
+      <span class="muted">Сохранение: схема v${save.v}. Реклама: ${Native ? (nb('isDemoAds', true) ? 'демо-блок Яндекса' : 'боевой блок') : 'демо (веб)'}; готова: ${Ads.isRewardedReady() ? 'да' : 'нет'}.</span>
+    </div></details>` : ''}
+    <span class="muted" style="text-align:center">Башенный лучник · версия ${APP_VERSION}</span>
     <button class="btn big" id="sBack">Готово</button>`);
   const flip = (k, fn) => () => { fn(); Store.save(save); Snd.setVolumes(); settings(); };
   on('sSound', flip('s', () => save.sound = !save.sound));
   on('sMusic', flip('m', () => save.music = !save.music));
+  on('sVibro', flip('v', () => { save.vibro = save.vibro === false; if (save.vibro) buzz(40); }));
   on('sFx', flip('f', () => save.fx = save.fx === 'low' ? 'high' : 'low'));
-  $('#test').ontoggle = e => testOpen = e.target.open;
-  $('#tw').onclick = e => { const b = e.target.closest('button[data-w]'); if (!b) return; save.wave = +b.dataset.w; save.farm = false; Store.save(save); settings(); };
-  on('tCoins', () => { save.coins = Math.max(1000, save.coins * 10); Store.save(save); settings(); });
-  on('tReset', () => { if (!resetArm) { resetArm = true; settings(); return; } resetArm = false; save = Store.fresh(); Store.save(save); S = Progress.stats(save.ups); settings(); });
-  on('tSounds', soundBoard);
+  on('sAds', flip('a', () => { save.consent = save.consent === 'personal' ? 'basic' : 'personal'; Ads.init(save.consent === 'personal'); }));
+  on('sHelp', () => tutorial(0, settings));
+  if (TESTER) {
+    $('#test').ontoggle = e => testOpen = e.target.open;
+    $('#tw').onclick = e => { const b = e.target.closest('button[data-w]'); if (!b) return; save.wave = +b.dataset.w; save.farm = false; Store.save(save); settings(); };
+    on('tCoins', () => { save.coins = Math.max(1000, save.coins * 10); Store.save(save); settings(); });
+    on('tReset', () => { if (!resetArm) { resetArm = true; settings(); return; } resetArm = false; const keep = { consent:save.consent, tutorialDone:true }; save = Object.assign(Store.fresh(), keep); Store.save(save); S = Progress.stats(save.ups); settings(); });
+    on('tSounds', soundBoard);
+  }
   on('sBack', () => { resetArm = false; showMenu(); });
+}
+
+/* ---------- первый запуск: согласие на рекламу и обучение ---------- */
+function consentCard(next) {
+  openOverlay(`<div class="label">Перед началом</div><h2>Добро пожаловать в «Башенного лучника»</h2>
+    <p>Игра бесплатная. Иногда можно <b>по желанию</b> посмотреть рекламу за награду — например, чтобы продолжить бой. Рекламу показывает Рекламная сеть Яндекса.</p>
+    <p class="muted">Персонализированная реклама подбирается по рекламному идентификатору устройства. Без персонализации объявления будут случайными. Прогресс игры хранится только на этом устройстве. Выбор можно изменить в настройках.</p>
+    <a class="muted" href="${PRIVACY_URL}" target="_blank" rel="noopener" style="text-decoration:underline">Политика конфиденциальности</a>
+    <button class="btn big" id="cYes">Разрешить персонализацию</button>
+    <button class="btn ghost" id="cNo">Только неперсонализированная</button>`);
+  const pick = v => { save.consent = v; Store.save(save); Ads.init(v === 'personal'); next(); };
+  on('cYes', () => pick('personal')); on('cNo', () => pick('basic'));
+}
+const TUTORIAL = [
+  ['volley', 'Стреляй одним пальцем', 'Коснись поля и веди палец к врагу — появится прицел. Отпусти, чтобы выпустить стрелу. Иногда лук выпускает веер из пяти стрел.'],
+  ['hp', 'Не пускай врагов к стене', 'Каждый прорвавшийся враг отнимает здоровье башни. Если оно кончится, волна начнётся заново — или вернись на волну назад и подкопи монет.'],
+  ['loot', 'Монеты остаются навсегда', 'Трать их в Лагере (кнопка ⚒) на улучшения без предела: урон, скорость стрельбы, залп, огонь и другие.'],
+  ['meteor', 'Навыки и боссы', 'Метеоры, быструю перезарядку и ледяную бурю изучи в Лагере — они появятся кнопками внизу. Каждые 20 волн ночью приходит босс: следи за кольцами-подсказками перед его ударами.'],
+];
+function tutorial(i, done) {
+  const [ic, h, t] = TUTORIAL[i];
+  openOverlay(`<div class="label">Как играть · ${i + 1} из ${TUTORIAL.length}</div>
+    <div class="enemy-card"><div class="big tut">${icon(ic, 60)}</div><h2>${h}</h2></div><p>${t}</p>
+    <div class="row2"><button class="btn ghost" id="tSkip">${i ? '← Назад' : 'Пропустить'}</button><button class="btn" id="tNext">${i < TUTORIAL.length - 1 ? 'Далее →' : 'Понятно'}</button></div>`);
+  on('tSkip', () => i ? tutorial(i - 1, done) : (save.tutorialDone = true, Store.save(save), done()));
+  on('tNext', () => { if (i < TUTORIAL.length - 1) tutorial(i + 1, done); else { save.tutorialDone = true; Store.save(save); done(); } });
 }
 
 let campTab = 'character', buyMode = 1;
@@ -2140,12 +2223,14 @@ function defeat(again) {
     <div class="stats"><span class="stat">Убито ${R.kills}</span><span class="stat">+<i class="coin"></i>${fmt(R.coins)}</span></div>
     <button class="btn big" id="oAgain">↻ Начать волну ${w} заново</button>
     ${w > 1 ? `<button class="btn ghost" id="oBack">← Вернуться на волну ${prev}</button>` : ''}
-    ${R.continued ? '' : '<button class="btn ad" id="oCont">▶ Продолжить бой с половиной ❤ (реклама)</button>'}
+    ${R.continued ? '' : `<button class="btn ad" id="oCont" ${Ads.isRewardedReady() ? '' : 'disabled'}>${Ads.isRewardedReady() ? '▶ Продолжить бой с половиной ❤ (реклама)' : 'Реклама загружается…'}</button>`}
+    ${R.doubled || R.coins < 1 ? '' : `<button class="btn ad" id="oDouble" ${Ads.isRewardedReady() ? '' : 'disabled'}>▶ Удвоить монеты попытки: +${fmt(R.coins)} (реклама)</button>`}
     <div class="row2"><button class="btn ghost" id="oCamp">⚒ Лагерь</button><button class="btn ghost" id="oMenu">⌂ В меню</button></div>`);
   on('oAgain', () => newRun(w));
   on('oBack', () => { save.farm = true; newRun(prev); });
   on('oCont', async () => { if (!Ads.isRewardedReady()) return; if (await Ads.showRewarded('continue')) {
-    R.continued = true; R.hp = Math.ceil(S.maxHp / 2); R.enemies = R.enemies.filter(e => e.y < L.wallY - 160); R.shots = []; resume(); } });
+    R.continued = true; R.hp = Math.ceil(S.maxHp / 2); R.enemies = R.enemies.filter(e => e.y < L.wallY - 160 || e.boss); if (R.boss && !R.boss.dead) R.boss.y = Math.min(R.boss.y, L.wallY - 200); R.shots = []; Store.save(save); resume(); } else defeat(true); });
+  on('oDouble', async () => { if (!Ads.isRewardedReady()) return; if (await Ads.showRewarded('double')) { save.coins += R.coins; R.coins *= 2; R.doubled = true; Store.save(save); toast('Монеты удвоены'); } defeat(true); });
   on('oCamp', () => camp('over'));
   on('oMenu', () => go(showMenu));
 }
@@ -2171,6 +2256,8 @@ async function requestWakeLock() { try { if ('wakeLock' in navigator && state ==
 
 window.addEventListener('resize', () => { resize(); buildMenuBg(); });
 resize(); showMenu(); requestAnimationFrame(frame);
+if (!save.consent) consentCard(() => save.tutorialDone ? showMenu() : tutorial(0, showMenu));
+else { Ads.init(save.consent === 'personal'); if (!save.tutorialDone) tutorial(0, showMenu); }
 /* ---------- хуки Android-обёртки (MainActivity) ---------- */
 window.__onAndroidPause = () => { if (state === 'play') pause(); Store.save(save); try { Snd.ctx && Snd.ctx.suspend(); } catch {} };
 window.__onAndroidBack = () => {
@@ -2178,7 +2265,8 @@ window.__onAndroidBack = () => {
   if (state === 'play') { pause(); return 'handled'; }
   if (state === 'paused') { resume(); return 'handled'; }
   if (state === 'over') return 'handled';
-  if (state === 'menu' && !$('#ov').hidden) { showMenu(); return 'handled'; }
+  if (state === 'menu' && !$('#ov').hidden) { if (!save.consent) return 'handled'; showMenu(); return 'handled'; }
+  if (Ads.pending) return 'handled';
   return 'exit';
 };
 window.__game = { get run() { return run; }, get state() { return state; }, update, fire, WaveGen, save: () => save };

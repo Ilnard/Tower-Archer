@@ -1,6 +1,8 @@
 package com.ilnard.towerarcher;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -18,6 +21,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private WebView web;
+    private AdsManager ads;
     private WindowInsets lastInsets;
 
     /** Передаёт в CSS безопасные отступы выреза камеры (--sat/--sab), чтобы интерфейс не прятался под ним. */
@@ -53,10 +57,17 @@ public class MainActivity extends Activity {
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) { view.requestApplyInsets(); pushInsets(); }
+            // внешние ссылки (политика конфиденциальности) открываются в браузере, а не внутри игры
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
+                Uri u = req.getUrl(); String sch = u.getScheme();
+                if ("http".equals(sch) || "https".equals(sch)) { try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { } return true; }
+                return false;
+            }
         });
         web.setOnApplyWindowInsetsListener((v, insets) -> { lastInsets = insets; pushInsets(); return v.onApplyWindowInsets(insets); });
-        web.addJavascriptInterface(new GameBridge(this), "AndroidBridge");
-        WebView.setWebContentsDebuggingEnabled(BuildConfigHolder.DEBUG);
+        ads = new AdsManager(this, web);
+        web.addJavascriptInterface(new GameBridge(this, ads), "AndroidBridge");
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);   // только в тестовой сборке
 
         setContentView(web);
         hideSystemUi();
@@ -112,6 +123,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (ads != null) ads.destroy();
         if (web != null) web.destroy();
         super.onDestroy();
     }

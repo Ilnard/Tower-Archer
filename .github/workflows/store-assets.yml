@@ -1,0 +1,36 @@
+name: Store assets
+
+# Графика для Google Play: скриншоты 1080×1920 и баннер 1024×500 с настоящими шрифтами
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'tools/store_shots.js', 'tools/store_icon.py' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Fonts
+        run: |
+          F=app/src/main/assets/fonts; B=https://github.com/google/fonts/raw/main/ofl
+          curl -fsSL -o $F/RussoOne-Regular.ttf "$B/russoone/RussoOne-Regular.ttf"
+          curl -fsSL -o $F/Nunito.ttf "$B/nunito/Nunito%5Bwght%5D.ttf"
+      - name: Render
+        run: |
+          npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+          mkdir -p store && node tools/store_shots.js "$PWD/app/src/main/assets/index.html" "$PWD/store"
+          python3 -m pip install --quiet pillow && python3 tools/store_icon.py store/icon_512.png
+          ls -la store
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: store-assets
+          name: Графика для Google Play
+          body: Скриншоты, баннер и иконка для карточки приложения.
+          files: store/*

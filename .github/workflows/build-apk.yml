@@ -1,4 +1,4 @@
-name: Build APK
+name: Build
 
 on:
   push:
@@ -11,6 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.UPLOAD_KEYSTORE_B64 != '' }}
+      VER: 1.0.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,24 +24,62 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.13'
 
-      - name: Build APK
-        run: gradle :app:assembleRelease --no-daemon
+      # Игра в сборке — ровно файл app/src/main/assets/index.html (единый источник)
+      - name: Check single source of the game
+        run: python3 tools/build_web.py --check
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk TowerArcher-0.6.${{ github.run_number }}.apk
+      - name: Fetch fonts (SIL OFL) into the APK
+        run: |
+          F=app/src/main/assets/fonts; B=https://github.com/google/fonts/raw/main/ofl
+          curl -fsSL -o $F/RussoOne-Regular.ttf "$B/russoone/RussoOne-Regular.ttf"
+          curl -fsSL -o $F/OFL-RussoOne.txt "$B/russoone/OFL.txt"
+          curl -fsSL -o $F/Nunito.ttf "$B/nunito/Nunito%5Bwght%5D.ttf"
+          curl -fsSL -o $F/OFL-Nunito.txt "$B/nunito/OFL.txt"
+          ls -la $F
+
+      - name: Test APK (demo ads, tester panel, .dev package)
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Decode upload key
+        if: env.HAS_KEY == 'true'
+        run: echo "${{ secrets.UPLOAD_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
+
+      - name: Release AAB + APK (signed with upload key)
+        if: env.HAS_KEY == 'true'
+        env:
+          UPLOAD_KEYSTORE_FILE: ${{ runner.temp }}/upload.jks
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          YANDEX_REWARDED_ID: ${{ vars.YANDEX_REWARDED_ID }}
+        run: gradle :app:bundleRelease :app:assembleRelease --no-daemon
+
+      - name: Collect files
+        run: |
+          mkdir out
+          cp app/build/outputs/apk/debug/app-debug.apk "out/TowerArcher-test-$VER.apk"
+          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            cp app/build/outputs/bundle/release/app-release.aab "out/TowerArcher-$VER.aab"
+            cp app/build/outputs/apk/release/app-release.apk "out/TowerArcher-$VER.apk"
+          fi
+          ls -la out
 
       - uses: actions/upload-artifact@v4
         with:
-          name: TowerArcher-apk
-          path: TowerArcher-*.apk
+          name: TowerArcher-${{ env.VER }}
+          path: out/*
 
-      - name: Publish release (direct download link for phone)
+      - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Сборка ${{ github.run_number }}
-          body: Тестовая сборка из коммита ${{ github.sha }}. Скачайте APK ниже и установите на телефон.
-          files: TowerArcher-*.apk
+          name: ${{ env.VER }}
+          body: |
+            Сборка ${{ env.VER }} из коммита ${{ github.sha }}.
+            • TowerArcher-test-*.apk — тестовая версия (отдельное приложение «Лучник (тест)», демо-реклама, панель тестировщика).
+            • TowerArcher-*.aab — для загрузки в Google Play Console (появляется, когда в секретах есть ключ загрузки).
+            • TowerArcher-*.apk — релизная версия для проверки на телефоне перед загрузкой.
+          files: out/*
           make_latest: true

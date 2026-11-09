@@ -1,35 +1,61 @@
 plugins { id 'com.android.application' }
 
-def buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+// Номер сборки из GitHub Actions; versionCode растёт с каждой сборкой
+def run = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+// Ключ загрузки Google Play приходит из секретов CI (файл расшифровывается в рабочую папку)
+def uploadKs = System.getenv("UPLOAD_KEYSTORE_FILE")
+// Рекламный блок Яндекса для релиза; по умолчанию — демо-блок для проверки
+def rewardedId = System.getenv("YANDEX_REWARDED_ID") ?: "demo-rewarded-yandex"
 
 android {
     namespace 'com.ilnard.towerarcher'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.ilnard.towerarcher'
         minSdk 24
-        targetSdk 35
-        versionCode buildNumber
-        versionName "0.6.${buildNumber}"
+        targetSdk 36
+        versionCode 1000 + run
+        versionName "1.0.${run}"
+        buildConfigField "String", "REWARDED_AD_UNIT", "\"demo-rewarded-yandex\""
+        buildConfigField "boolean", "TESTER_TOOLS", "true"
     }
 
+    buildFeatures { buildConfig true }
+
     signingConfigs {
-        // Тестовый ключ лежит в репозитории, чтобы новые сборки ставились поверх старых.
-        // Для Google Play будет отдельный секретный ключ.
+        // Тестовый ключ — только для тестовых сборок (.dev), в Google Play не попадает
         test {
             storeFile file('test.keystore')
             storePassword 'android'
             keyAlias 'test'
             keyPassword 'android'
         }
+        if (uploadKs) {
+            upload {
+                storeFile file(uploadKs)
+                storePassword System.getenv("UPLOAD_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("UPLOAD_KEY_ALIAS")
+                keyPassword System.getenv("UPLOAD_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
-        debug { signingConfig signingConfigs.test }
+        // Тестовая сборка: ставится рядом с релизом, демо-реклама, панель тестировщика, отладка WebView
+        debug {
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-test"
+            signingConfig signingConfigs.test
+            resValue "string", "app_name", "Лучник (тест)"
+        }
+        // Релиз для Google Play: подпись ключом загрузки, без отладки и тестовых инструментов
         release {
             minifyEnabled false
-            signingConfig signingConfigs.test
+            resValue "string", "app_name", "Башенный лучник"
+            buildConfigField "String", "REWARDED_AD_UNIT", "\"${rewardedId}\""
+            buildConfigField "boolean", "TESTER_TOOLS", "false"
+            if (uploadKs) signingConfig signingConfigs.upload
         }
     }
 
@@ -42,4 +68,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+
+dependencies {
+    implementation 'com.yandex.android:mobileads:7.18.7'
+    implementation 'androidx.annotation:annotation:1.9.1'
 }
