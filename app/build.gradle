@@ -4,8 +4,8 @@ plugins { id 'com.android.application' }
 def run = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
 // Ключ загрузки Google Play приходит из секретов CI (файл расшифровывается в рабочую папку)
 def uploadKs = System.getenv("UPLOAD_KEYSTORE_FILE")
-// Рекламный блок Яндекса для релиза; по умолчанию — демо-блок для проверки
-def rewardedId = System.getenv("YANDEX_REWARDED_ID") ?: "demo-rewarded-yandex"
+// Рекламный блок Яндекса для релиза (Рекламная сеть Яндекса, приложение 20373346, блок «с вознаграждением»)
+def rewardedId = System.getenv("YANDEX_REWARDED_ID") ?: "R-M-20373346-1"
 
 android {
     namespace 'com.ilnard.towerarcher'
