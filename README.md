@@ -2,6 +2,8 @@
 
 Мобильная игра «защита башни» для Android: HTML5-игра в нативной обёртке (WebView) с рекламой Yandex Mobile Ads.
 
+**Обслуживание и обновления — [MAINTENANCE.md](MAINTENANCE.md).**
+
 **Публикация: RuStore — [RUSTORE.md](RUSTORE.md) (основной магазин); Google Play — [RELEASE.md](RELEASE.md) (на будущее, там же устройство сборки).**
 
 - Игра: `app/src/main/assets/index.html` (единственный источник; веб-версия собирается `tools/build_web.py`)
