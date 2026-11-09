@@ -4,7 +4,7 @@ name: Store assets
 on:
   push:
     branches: [ main ]
-    paths: [ 'tools/store_shots.js', 'tools/render_icon.js' ]
+    paths: [ 'tools/store_shots.js', 'tools/render_icon.js', 'tools/store_compose.js' ]
   workflow_dispatch:
 
 permissions:
@@ -27,6 +27,7 @@ jobs:
           npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
           mkdir -p store && node tools/store_shots.js "$PWD/app/src/main/assets/index.html" "$PWD/store"
           mkdir -p icon && node tools/render_icon.js "$PWD/app/src/main/assets/index.html" "$PWD/icon" && cp icon/icon512.png store/icon_512.png
+          node tools/store_compose.js store store app/src/main/assets/fonts
           ls -la store
       - uses: softprops/action-gh-release@v2
         with:
