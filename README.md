@@ -2,7 +2,7 @@
 
 Мобильная игра «защита башни» для Android: HTML5-игра в нативной обёртке (WebView) с рекламой Yandex Mobile Ads.
 
-**Релиз, сборки, что сделать перед публикацией — см. [RELEASE.md](RELEASE.md).**
+**Публикация: RuStore — [RUSTORE.md](RUSTORE.md) (основной магазин); Google Play — [RELEASE.md](RELEASE.md) (на будущее, там же устройство сборки).**
 
 - Игра: `app/src/main/assets/index.html` (единственный источник; веб-версия собирается `tools/build_web.py`)
 - Android: `app/src/main/java/com/ilnard/towerarcher/` — `MainActivity` (WebView), `GameBridge` (мост JS↔Android), `AdsManager` (реклама)
